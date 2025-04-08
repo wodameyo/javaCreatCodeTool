@@ -69,7 +69,7 @@ public class FieldInfo {
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
-        isAutoIncrement = autoIncrement;
+        this.isAutoIncrement = autoIncrement;
     }
 
     /**

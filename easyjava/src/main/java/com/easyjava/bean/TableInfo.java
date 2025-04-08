@@ -134,4 +134,5 @@ public class TableInfo {
      * 是否有BigDecimal类型
      */
     private boolean haveBigDecimal;
+
 }

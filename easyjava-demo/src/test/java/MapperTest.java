@@ -26,4 +26,17 @@ public class MapperTest {
             System.out.println(userInfo);
         }
     }
+    @Test
+    public void insert() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserName("哈呀哈机密");
+        userInfo.setProductName("哈密");
+        userInfo.setTaotle(514);
+        userInfo.setStatus(1);
+        userInfo.setCreateDate(new java.util.Date());
+        userInfo.setCreateTime(new java.util.Date());
+        userInfo.setIsDel(0);
+        userInfoMapper.insert(userInfo);
+        System.out.println(userInfo.getId());
+    }
 }

@@ -104,4 +104,62 @@
 		SELECT count(1) FROM ts_user_info <include refid="Query_Condition"/>
 	</select>
 
+	<!--单条插入(匹配有值的字段)-->
+	<insert id="insert" parameterType="com.easyjava.entity.po.UserInfo" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_user_info 
+
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.productName != null">
+				product_name,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.taotle != null">
+				taotle,
+			</if>
+			<if test="bean.status != null">
+				status,
+			</if>
+			<if test="bean.createDate != null">
+				create_date,
+			</if>
+			<if test="bean.isDel != null">
+				is_del,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				#{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.taotle != null">
+				#{bean.taotle},
+			</if>
+			<if test="bean.status != null">
+				#{bean.status},
+			</if>
+			<if test="bean.createDate != null">
+				#{bean.createDate},
+			</if>
+			<if test="bean.isDel != null">
+				#{bean.isDel},
+			</if>
+		</trim>
+	</insert>
+
 </mapper>
