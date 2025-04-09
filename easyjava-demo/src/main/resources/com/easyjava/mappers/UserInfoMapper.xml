@@ -162,4 +162,112 @@
 		</trim>
 	</insert>
 
+	<!--插入或更新(匹配有值的字段)-->
+	<insert id="insertOrUpdate" parameterType="com.easyjava.entity.po.UserInfo" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_user_info 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.productName != null">
+				product_name,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.taotle != null">
+				taotle,
+			</if>
+			<if test="bean.status != null">
+				status,
+			</if>
+			<if test="bean.createDate != null">
+				create_date,
+			</if>
+			<if test="bean.isDel != null">
+				is_del,
+			</if>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				#{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.taotle != null">
+				#{bean.taotle},
+			</if>
+			<if test="bean.status != null">
+				#{bean.status},
+			</if>
+			<if test="bean.createDate != null">
+				#{bean.createDate},
+			</if>
+			<if test="bean.isDel != null">
+				#{bean.isDel},
+			</if>
+		</trim>
+		ON DUPLICATE KEY UPDATE
+		<trim suffixOverrides=",">
+			<if test="bean.productName != null">
+				product_name = VALUES(product_name),
+			</if>
+			<if test="bean.createTime != null">
+				create_time = VALUES(create_time),
+			</if>
+			<if test="bean.taotle != null">
+				taotle = VALUES(taotle),
+			</if>
+			<if test="bean.status != null">
+				status = VALUES(status),
+			</if>
+			<if test="bean.createDate != null">
+				create_date = VALUES(create_date),
+			</if>
+			<if test="bean.isDel != null">
+				is_del = VALUES(is_del),
+			</if>
+		</trim>
+	</insert>
+
+	<!--批量插入-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty=".id">
+		INSERT INTO ts_user_info( user_name,product_name,create_time,taotle,status,create_date,is_del )VALUES
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel}
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty=".id">
+		INSERT INTO ts_user_info (user_name,product_name,create_time,taotle,status,create_date,is_del) VALUES
+		<foreach collection="list" item="item" separator="," open="(" close=")">
+			#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel}
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		user_name = VALUES(user_name),product_name = VALUES(product_name),create_time = VALUES(create_time),taotle = VALUES(taotle),status = VALUES(status),create_date = VALUES(create_date),is_del = VALUES(is_del)
+	</insert>
+    /**
+     * 根据Id查询
+     */
+	<select id="selectById" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where id=#{ id}
+	</select>
+    /**
+     * 根据UserName查询
+     */
+	<select id="selectByUserName" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where userName=#{ userName}
+	</select>
 </mapper>

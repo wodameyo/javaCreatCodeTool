@@ -39,4 +39,14 @@ public class MapperTest {
         userInfoMapper.insert(userInfo);
         System.out.println(userInfo.getId());
     }
+    @Test
+    public void insertOrUpdate() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(3);
+        userInfo.setUserName("米呀密集哈");
+        userInfo.setProductName("测试01");
+        userInfo.setTaotle(514);
+        this.userInfoMapper.insertOrUpdate(userInfo);
+        System.out.println(userInfo.getId());
+    }
 }
