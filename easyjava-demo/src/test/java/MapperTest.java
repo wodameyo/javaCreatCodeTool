@@ -92,7 +92,8 @@ public class MapperTest {
         userInfo.setProductName("哈基哈基哈基米");
         userInfo.setCreateTime(new java.util.Date());
         userInfo.setCreateDate(new java.util.Date());
-        userInfoMapper.updateById(userInfo,10);
+        Long count = userInfoMapper.updateById(userInfo,10);
+        System.out.println("-----"+count+"-----");
     }
     @Test
     public void deletebykey() {
