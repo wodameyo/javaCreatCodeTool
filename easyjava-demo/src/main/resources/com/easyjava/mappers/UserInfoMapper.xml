@@ -244,30 +244,97 @@
 	<!--批量插入-->
 	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty=".id">
 		INSERT INTO ts_user_info( user_name,product_name,create_time,taotle,status,create_date,is_del )VALUES
-		<foreach collection="list" item="item" separator="," open="(" close=")">
-			#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel}
+		<foreach collection="list" item="item" separator="," >
+			(#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel})
 		</foreach>
 	</insert>
 
 	<!--批量插入或更新-->
 	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty=".id">
 		INSERT INTO ts_user_info (user_name,product_name,create_time,taotle,status,create_date,is_del) VALUES
-		<foreach collection="list" item="item" separator="," open="(" close=")">
-			#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel}
+		<foreach collection="list" item="item" separator="," >
+			(#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel})
 		</foreach>
 		ON DUPLICATE KEY UPDATE
 		user_name = VALUES(user_name),product_name = VALUES(product_name),create_time = VALUES(create_time),taotle = VALUES(taotle),status = VALUES(status),create_date = VALUES(create_date),is_del = VALUES(is_del)
 	</insert>
-    /**
-     * 根据Id查询
-     */
+
+	<!--根据Id查询-->
 	<select id="selectById" resultMap="base_result_map">
-		SELECT <include refid="Base_Column_List"/> from ts_user_info where id=#{ id}
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where id=#{id}
 	</select>
-    /**
-     * 根据UserName查询
-     */
+
+	<!--根据Id更新-->
+	<update id="updateById" parameterType="com.easyjava.entity.po.UserInfo">
+		UPDATE ts_user_info
+		<set>
+			<if test="bean.userName!= null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.productName!= null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.createTime!= null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.taotle!= null">
+				taotle = #{bean.taotle},
+			</if>
+			<if test="bean.status!= null">
+				status = #{bean.status},
+			</if>
+			<if test="bean.createDate!= null">
+				create_date = #{bean.createDate},
+			</if>
+			<if test="bean.isDel!= null">
+				is_del = #{bean.isDel},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		DELETE FROM ts_user_info where id=#{id}
+	</delete>
+
+	<!--根据UserName查询-->
 	<select id="selectByUserName" resultMap="base_result_map">
-		SELECT <include refid="Base_Column_List"/> from ts_user_info where userName=#{ userName}
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where userName=#{userName}
 	</select>
+
+	<!--根据UserName更新-->
+	<update id="updateByUserName" parameterType="com.easyjava.entity.po.UserInfo">
+		UPDATE ts_user_info
+		<set>
+			<if test="bean.userName!= null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.productName!= null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.createTime!= null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.taotle!= null">
+				taotle = #{bean.taotle},
+			</if>
+			<if test="bean.status!= null">
+				status = #{bean.status},
+			</if>
+			<if test="bean.createDate!= null">
+				create_date = #{bean.createDate},
+			</if>
+			<if test="bean.isDel!= null">
+				is_del = #{bean.isDel},
+			</if>
+		</set>
+		where userName=#{userName}
+	</update>
+
+	<!--根据UserName删除-->
+	<delete id="deleteByUserName">
+		DELETE FROM ts_user_info where userName=#{userName}
+	</delete>
+
 </mapper>

@@ -7,10 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @SpringBootTest(classes = RunDemoApplication.class)
 public class MapperTest {
@@ -48,5 +45,57 @@ public class MapperTest {
         userInfo.setTaotle(514);
         this.userInfoMapper.insertOrUpdate(userInfo);
         System.out.println(userInfo.getId());
+    }
+    @Test
+    public void insertBatch() {
+        List<UserInfo> list = new ArrayList<>();
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserName("哈密3");
+        userInfo.setProductName("米呀米基哈2");
+        userInfo.setCreateTime(new java.util.Date());
+        userInfo.setCreateDate(new java.util.Date());
+        list.add(userInfo);
+        userInfo = new UserInfo();
+        userInfo.setUserName("哈密4");
+        userInfo.setProductName("米呀密哈3");
+        userInfo.setCreateTime(new java.util.Date());
+        userInfo.setCreateDate(new java.util.Date());
+        list.add(userInfo);
+        userInfoMapper.insertBatch(list);
+    }
+
+    @Test
+    public void insertOrUpdateBatch() {
+        List<UserInfo> list = new ArrayList<>();
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserName("哈密3");
+        userInfo.setProductName("曼波111");
+        userInfo.setCreateTime(new java.util.Date());
+        userInfo.setCreateDate(new java.util.Date());
+        list.add(userInfo);
+        userInfo = new UserInfo();
+        userInfo.setUserName("哈密4");
+        userInfo.setProductName("曼波222");
+        userInfo.setCreateTime(new java.util.Date());
+        userInfo.setCreateDate(new java.util.Date());
+        list.add(userInfo);
+        userInfoMapper.insertOrUpdateBatch(list);
+    }
+    @Test
+    public void selectbykey() {
+        UserInfo userInfo = userInfoMapper.selectById(1);
+        System.out.println(userInfo);
+    }
+    @Test
+    public void updatebykey() {
+        UserInfo userInfo = new UserInfo();
+        userInfo.setProductName("哈基哈基哈基米");
+        userInfo.setCreateTime(new java.util.Date());
+        userInfo.setCreateDate(new java.util.Date());
+        userInfoMapper.updateById(userInfo,10);
+    }
+    @Test
+    public void deletebykey() {
+        userInfoMapper.deleteById(12);
     }
 }
