@@ -15,13 +15,15 @@ public class RunApplication {
         for(TableInfo tableInfo : tableInfoList){
             // BuildPo.excute(tableInfo);
 
-            // BuildQuery.excute(tableInfo);
+            BuildQuery.excute(tableInfo);
 
             BuildMapper.execute(tableInfo);
 
             BuildMapperXml.execute(tableInfo);
 
             BuildService.excute(tableInfo);
+
+            BuildServiceImpl.excute(tableInfo);
         }
 
     }

@@ -73,13 +73,13 @@ public class BuildMapper {
                 bw.newLine();
 
                 BuildComment.createFieldComment(bw, "根据" + methodName + "更新");
-                bw.write("\tLong updateBy" + methodName + "(@Param(\"bean\") T t, " + methodParam + ");");
+                bw.write("\tInteger updateBy" + methodName + "(@Param(\"bean\") T t, " + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();
 
                 BuildComment.createFieldComment(bw, "根据" + methodName + "删除");
-                bw.write("\tLong deleteBy" + methodName + "(" + methodParam + ");");
+                bw.write("\tInteger deleteBy" + methodName + "(" + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();

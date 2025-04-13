@@ -77,7 +77,7 @@ public class BuildService {
             bw.newLine();
 
             BuildComment.createFieldComment(bw, "根据条件查询数量");
-            bw.write("\tLong findCountByParam("+tableInfo.getBeanParamName()+" query);");
+            bw.write("\tInteger findCountByParam("+tableInfo.getBeanParamName()+" query);");
             bw.newLine();
             bw.newLine();
 
@@ -87,17 +87,17 @@ public class BuildService {
             bw.newLine();
 
             BuildComment.createFieldComment(bw, "新增");
-            bw.write("\tLong add("+tableInfo.getBeanName()+" bean);");
+            bw.write("\tInteger add("+tableInfo.getBeanName()+" bean);");
             bw.newLine();
             bw.newLine();
 
             BuildComment.createFieldComment(bw, "批量新增");
-            bw.write("\tLong addBatch(List<"+tableInfo.getBeanName()+"> listbean);");
+            bw.write("\tInteger addBatch(List<"+tableInfo.getBeanName()+"> listbean);");
             bw.newLine();
             bw.newLine();
 
             BuildComment.createFieldComment(bw, "批量新增或修改");
-            bw.write("\tLong addOrUpdateBatch(List<"+tableInfo.getBeanName()+"> listbean);");
+            bw.write("\tInteger addOrUpdateBatch(List<"+tableInfo.getBeanName()+"> listbean);");
             bw.newLine();
             bw.newLine();
 
@@ -121,19 +121,19 @@ public class BuildService {
                     }
                 }
                 BuildComment.createFieldComment(bw, "根据" + methodName + "查询");
-                bw.write("\t"+tableInfo.getBeanName()+" getBy" + methodName + "(" + methodParam + ");");
+                bw.write("\t"+tableInfo.getBeanName()+" get"+tableInfo.getBeanName()+"By" + methodName + "(" + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();
 
                 BuildComment.createFieldComment(bw, "根据" + methodName + "更新");
-                bw.write("\tLong updateBy" + methodName + "("+tableInfo.getBeanName()+" bean, " + methodParam + ");");
+                bw.write("\tInteger update"+tableInfo.getBeanName()+"By" + methodName + "("+tableInfo.getBeanName()+" bean, " + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();
 
                 BuildComment.createFieldComment(bw, "根据" + methodName + "删除");
-                bw.write("\tLong deleteBy" + methodName + "(" + methodParam + ");");
+                bw.write("\tInteger delete"+tableInfo.getBeanName()+"By" + methodName + "(" + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();
