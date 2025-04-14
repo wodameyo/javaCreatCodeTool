@@ -13,7 +13,7 @@ public class RunApplication {
         BuildBase.execute();
 
         for(TableInfo tableInfo : tableInfoList){
-            // BuildPo.excute(tableInfo);
+            BuildPo.excute(tableInfo);
 
             BuildQuery.excute(tableInfo);
 
@@ -24,6 +24,8 @@ public class RunApplication {
             BuildService.excute(tableInfo);
 
             BuildServiceImpl.excute(tableInfo);
+
+            BuildController.excute(tableInfo);
         }
 
     }
