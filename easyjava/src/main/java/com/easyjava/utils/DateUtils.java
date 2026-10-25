@@ -17,10 +17,11 @@ public class DateUtils {
 
     public static Date parse(String date,String pattern) {
         try{
-            new SimpleDateFormat(pattern).parse(date);
+            SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+            formatter.setLenient(false);
+            return formatter.parse(date);
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("日期解析失败: " + date + "，格式: " + pattern, e);
         }
-        return null;
     }
 }

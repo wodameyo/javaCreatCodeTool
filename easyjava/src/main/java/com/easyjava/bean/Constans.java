@@ -2,6 +2,9 @@ package com.easyjava.bean;
 
 import com.easyjava.utils.PropertiesUtils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class Constans {
     public static String AUTHER_COMMENT ;
 
@@ -27,10 +30,6 @@ public class Constans {
 
     public static String BEAN_DATE_PARSE_EXPRESSION;
     public static String BEAN_DATE_PARSE_CLASS;
-
-    public static String PATH_JAVA = "java";
-
-    public static String PATH_RESOURCE = "resources";
 
     public static String PACKAGE_BASE;
 
@@ -114,34 +113,44 @@ public class Constans {
         PACKAGE_SERVICE_IMPL = PACKAGE_BASE + "." + PropertiesUtils.getString("package.service.impl");
         PACKAGE_CONTROLLER = PACKAGE_BASE + "." + PropertiesUtils.getString("package.controller");
 
-        PATH_BASE = PropertiesUtils.getString("path.base");
-        PATH_BASE = PATH_BASE + PATH_JAVA;
+        // path.base 为目标项目根目录，源码与资源统一从根目录推导
+        Path projectRoot = Paths.get(PropertiesUtils.getString("path.base")).toAbsolutePath().normalize();
+        PATH_BASE = projectRoot.resolve("src/main/java").toString();
 
-        PATH_PO = PATH_BASE + "/" + PACKAGE_PO.replace(".", "/");
-        PATH_UTILS = PATH_BASE + "/" + PACKAGE_UTILS.replace(".", "/");
-        PATH_EXCEPTION = PATH_BASE + "/" + PACKAGE_EXCEPTION.replace(".", "/");
-        PATH_ENUMS = PATH_BASE + "/" + PACKAGE_ENUMS.replace(".", "/");
-        PATH_QUERY = PATH_BASE + "/" + PACKAGE_QUERY.replace(".", "/");
-        PATH_VO = PATH_BASE + "/" + PACKAGE_VO.replace(".", "/");
-        PATH_MAPPERS = PATH_BASE + "/" + PACKAGE_MAPPERS.replace(".", "/");
-        PATH_SERVICE = PATH_BASE + "/" + PACKAGE_SERVICE.replace(".", "/");
-        PATH_SERVICE_IMPL = PATH_BASE + "/" + PACKAGE_SERVICE_IMPL.replace(".", "/");
+        PATH_PO = Paths.get(PATH_BASE, PACKAGE_PO.replace(".", "/")).toString();
+        PATH_UTILS = Paths.get(PATH_BASE, PACKAGE_UTILS.replace(".", "/")).toString();
+        PATH_EXCEPTION = Paths.get(PATH_BASE, PACKAGE_EXCEPTION.replace(".", "/")).toString();
+        PATH_ENUMS = Paths.get(PATH_BASE, PACKAGE_ENUMS.replace(".", "/")).toString();
+        PATH_QUERY = Paths.get(PATH_BASE, PACKAGE_QUERY.replace(".", "/")).toString();
+        PATH_VO = Paths.get(PATH_BASE, PACKAGE_VO.replace(".", "/")).toString();
+        PATH_MAPPERS = Paths.get(PATH_BASE, PACKAGE_MAPPERS.replace(".", "/")).toString();
+        PATH_SERVICE = Paths.get(PATH_BASE, PACKAGE_SERVICE.replace(".", "/")).toString();
+        PATH_SERVICE_IMPL = Paths.get(PATH_BASE, PACKAGE_SERVICE_IMPL.replace(".", "/")).toString();
+        PATH_CONTROLLER = Paths.get(PATH_BASE, PACKAGE_CONTROLLER.replace(".", "/")).toString();
 
-        PATH_MAPPER_XML = PropertiesUtils.getString("path.base") + PATH_RESOURCE +"/"+ PACKAGE_MAPPERS.replace(".", "/");
-        PATH_CONTROLLER = PATH_BASE + "/" + PACKAGE_CONTROLLER.replace(".", "/");
+        PATH_MAPPER_XML = projectRoot.resolve("src/main/resources")
+                .resolve(PACKAGE_MAPPERS.replace(".", "/")).toString();
     }
 
     public static String[] SQL_DATE_TIME_TYPES = new String[]{"datetime","timestamp"};
 
     public static String[] SQL_DATE_TYPES = new String[]{"date"};
 
-    public static String[] SQL_DECIMAL_TYPES = new String[]{"decimal","double","float"};
+    public static String[] SQL_TIME_TYPES = new String[]{"time"};
 
-    public static String[] SQL_STRING_TYPES = new String[]{"char","varchar","text","mediumtext","longtext"};
+    public static String[] SQL_YEAR_TYPES = new String[]{"year"};
 
-    public static String[] SQL_INTEGER_TYPES = new String[]{"int","tinyint"};
+    public static String[] SQL_DECIMAL_TYPES = new String[]{"decimal","numeric","double","float","real"};
+
+    public static String[] SQL_STRING_TYPES = new String[]{"char","varchar","text","tinytext","mediumtext","longtext","json","enum","set"};
+
+    public static String[] SQL_INTEGER_TYPES = new String[]{"int","tinyint","smallint","mediumint"};
 
     public static String[] SQL_LONG_TYPES = new String[]{"bigint"};
+
+    public static String[] SQL_BOOLEAN_TYPES = new String[]{"bit","bool","boolean"};
+
+    public static String[] SQL_BINARY_TYPES = new String[]{"binary","varbinary","blob","tinyblob","mediumblob","longblob"};
 
     public static void main(String[] args) {
         System.out.println(PACKAGE_PO);

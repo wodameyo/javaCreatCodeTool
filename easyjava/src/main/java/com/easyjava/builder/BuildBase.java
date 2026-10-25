@@ -1,6 +1,12 @@
 package com.easyjava.builder;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,90 +91,37 @@ public class BuildBase {
 
     private static void build(List<String> headrInfoList, String fileName, String outputPath) {
         File folder = new File(outputPath);
-        if(!folder.exists()) {
-            folder.mkdirs();
+        if(!folder.exists() && !folder.mkdirs()) {
+            throw new IllegalStateException("无法创建输出目录: " + folder.getAbsolutePath());
         }
 
         File javaFile = new File(folder, fileName + ".java");
+        String resourceName = "template/" + fileName + ".txt";
 
-        OutputStream out = null;
-        OutputStreamWriter outw = null;
-        BufferedWriter bw = null;
+        try (InputStream in = BuildBase.class.getClassLoader().getResourceAsStream(resourceName)) {
+            if (in == null) {
+                throw new IllegalStateException("找不到模板文件: " + resourceName);
+            }
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                 BufferedWriter bw = Files.newBufferedWriter(javaFile.toPath(), StandardCharsets.UTF_8)) {
 
-        InputStream in = null;
-        InputStreamReader inr = null;
-        BufferedReader br = null;
+                for (String headrInfo : headrInfoList) {
+                    bw.write(headrInfo);
+                    bw.newLine();
+                    if (headrInfo.contains("package ")) {
+                        bw.newLine();
+                    }
+                }
 
-        try {
-            out = new FileOutputStream(javaFile);
-            outw = new OutputStreamWriter(out,"utf8");
-            bw = new BufferedWriter(outw);
-
-            String templatePath = BuildBase.class.getClassLoader().getResource("template/"+fileName+".txt").getPath();
-            in = new FileInputStream(templatePath);
-            inr = new InputStreamReader(in,"utf8");
-            br = new BufferedReader(inr);
-
-            for(String headrInfo : headrInfoList) {
-                bw.write(headrInfo);
-                bw.newLine();
-                if(headrInfo.contains("package ")) {
+                String lineInfo;
+                while ((lineInfo = br.readLine()) != null) {
+                    bw.write(lineInfo);
                     bw.newLine();
                 }
+                bw.flush();
             }
-
-            String lineInfo = null;
-            while((lineInfo=br.readLine())!=null) {
-                bw.write(lineInfo);
-                bw.newLine();
-            }
-            bw.flush();
-
         } catch (Exception e) {
-            logger.error("生成基础类失败: 文件名={}，输出路径={}",fileName,e);
-        } finally {
-            if (bw != null){
-                try {
-                    bw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (outw != null){
-                try {
-                    outw.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (out != null){
-                try {
-                    out.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (br != null){
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (inr != null){
-                try {
-                    inr.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (in != null){
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            throw new IllegalStateException("生成基础类失败: 文件名=" + fileName + "，输出路径=" + outputPath, e);
         }
     }
 }

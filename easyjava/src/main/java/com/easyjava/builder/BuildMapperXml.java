@@ -8,10 +8,16 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BuildMapperXml {
     private static final Logger logger = LoggerFactory.getLogger(BuildMapperXml.class);
@@ -32,14 +38,27 @@ public class BuildMapperXml {
         String className = tableInfo.getBeanName() + Constans.SUFFIX_MAPPERS;
         File poFile = new File(folder, className+ ".xml");
 
-        OutputStream out = null;
-        OutputStreamWriter outw = null;
-        BufferedWriter bw = null;
-        try {
-            out = new FileOutputStream(poFile);
-            outw = new OutputStreamWriter(out, "utf8");
-            bw = new BufferedWriter(outw);
+        FieldInfo autoIncrementField = null;
+        for (FieldInfo fieldInfo : tableInfo.getFieldList()) {
+            if (fieldInfo.isAutoIncrement()) {
+                autoIncrementField = fieldInfo;
+                break;
+            }
+        }
+        String generatedKeys = autoIncrementField == null ? ""
+                : " useGeneratedKeys=\"true\" keyProperty=\"bean." + autoIncrementField.getPropertyName() + "\"";
+        String batchGeneratedKeys = autoIncrementField == null ? ""
+                : " useGeneratedKeys=\"true\" keyProperty=\"" + autoIncrementField.getPropertyName() + "\"";
 
+        Set<String> primaryKeyPropertyNames = new LinkedHashSet<>();
+        List<FieldInfo> primaryFieldList = tableInfo.getKeyIndexMap().get("PRIMARY");
+        if (primaryFieldList != null) {
+            for (FieldInfo fieldInfo : primaryFieldList) {
+                primaryKeyPropertyNames.add(fieldInfo.getPropertyName());
+            }
+        }
+
+        try (BufferedWriter bw = Files.newBufferedWriter(poFile.toPath(), StandardCharsets.UTF_8)) {
             bw.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
             bw.newLine();
             bw.write("<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\" >");
@@ -53,24 +72,12 @@ public class BuildMapperXml {
             bw.write("\t<resultMap id=\"base_result_map\" type=\"" + poClass + "\">");
             bw.newLine();
 
-            FieldInfo idField = null;
-            for(Map.Entry<String, List<FieldInfo>> entry : tableInfo.getKeyIndexMap().entrySet()) {
-                if("PRIMARY".equals(entry.getKey())){
-                    idField = entry.getValue().get(0);
-                    break;
-                }
-            }
-
             for(FieldInfo fieldInfo : tableInfo.getFieldList()) {
-                bw.write(("\t\t<!--" + fieldInfo.getComment() + "-->"));
+                bw.write(("\t\t<!--" + escapeXmlComment(fieldInfo.getComment()) + "-->"));
                 bw.newLine();
-                String key = "";
-                if (idField != null && fieldInfo.getPropertyName().equals(idField.getPropertyName())) {
-                    key = "id";
-                } else {
-                    key = "result";
-                }
-                bw.write("\t\t<" + key + " column=\"" + fieldInfo.getFieldName() + "\" property=\"" + fieldInfo.getPropertyName() + "\" javaType=\"" + fieldInfo.getJavaType() + "\" />");
+                String key = primaryKeyPropertyNames.contains(fieldInfo.getPropertyName()) ? "id" : "result";
+                bw.write("\t\t<" + key + " column=\"" + fieldInfo.getFieldName() + "\" property=\""
+                        + fieldInfo.getPropertyName() + "\" />");
                 bw.newLine();
                 bw.newLine();
             }
@@ -106,8 +113,8 @@ public class BuildMapperXml {
 
                 bw.write("\t\t<if test=\"query." + fieldInfo.getPropertyName() + " != null" +stringQuery +"\">");
                 bw.newLine();
-                // bw.write("\t\t\tand t." + fieldInfo.getFieldName() + " = #{query." + fieldInfo.getPropertyName() + "}");
-                bw.write("\t\t\tand id = #{query." + fieldInfo.getPropertyName() + "}");
+                bw.write("\t\t\tand t." + fieldInfo.getFieldName() + " = #{query." + fieldInfo.getPropertyName() + "}");
+                // bw.write("\t\t\tand id = #{query." + fieldInfo.getPropertyName() + "}");
                 bw.newLine();
                 bw.write(("\t\t</if>"));
                 bw.newLine();
@@ -123,12 +130,12 @@ public class BuildMapperXml {
             for(FieldInfo fieldInfo : tableInfo.getExtendFieldList()) {
                 String andWhere = "";
                 if(ArrayUtils.contains(Constans.SQL_STRING_TYPES, fieldInfo.getSqlType())) {
-                    andWhere = " and " + fieldInfo.getFieldName() + " like concat('%', #{query." +fieldInfo.getPropertyName() + "}, '%')";
+                    andWhere = " and t." + fieldInfo.getFieldName() + " like concat('%', #{query." +fieldInfo.getPropertyName() + "}, '%')";
                 } else if(ArrayUtils.contains(Constans.SQL_DATE_TIME_TYPES, fieldInfo.getSqlType())|| ArrayUtils.contains(Constans.SQL_DATE_TYPES, fieldInfo.getSqlType())) {
                     if(fieldInfo.getPropertyName().endsWith(Constans.SUFFIX_BAEN_QUERY_TIME_START)) {
-                        andWhere = "and " + fieldInfo.getFieldName() + " >= str_to_date(#{query." + fieldInfo.getPropertyName() + "}, '%Y-%m-%d')";
+                        andWhere = "and t." + fieldInfo.getFieldName() + " >= str_to_date(#{query." + fieldInfo.getPropertyName() + "}, '%Y-%m-%d')";
                     }else if(fieldInfo.getPropertyName().endsWith(Constans.SUFFIX_BAEN_QUERY_TIME_END)) {
-                        andWhere = "and " + fieldInfo.getFieldName() + " &lt; date_sub(str_to_date(#{query." + fieldInfo.getPropertyName() + "}, '%Y-%m-%d')," + "interval 1 day)";
+                        andWhere = "and t." + fieldInfo.getFieldName() + " &lt; date_sub(str_to_date(#{query." + fieldInfo.getPropertyName() + "}, '%Y-%m-%d')," + "interval 1 day)";
                     }
 
                 }
@@ -168,12 +175,12 @@ public class BuildMapperXml {
             bw.newLine();
             bw.write("\t<select id=\"selectList\" resultMap=\"base_result_map\">");
             bw.newLine();
-            bw.write("\t\tSELECT <include refid=\""+ BASE_COLUMN_LIST + "\"/> FROM " + tableInfo.getTableName() +" <include refid=\""
+            bw.write("\t\tSELECT <include refid=\""+ BASE_COLUMN_LIST + "\"/> FROM " + tableInfo.getTableName() + " t<include refid=\""
             +QUERY_CONDITION + "\"/>");
             bw.newLine();
-            bw.write("\t\t<if test=\"query.orderBy!=null\">order by $(query.orderBy)</if>");
+            bw.write("\t\t<if test=\"query.orderBy!=null and query.orderBy!=''\">order by ${query.orderBy}</if>");
             bw.newLine();
-            bw.write("\t\t<if test=\"query.simplePage!=null\">limit #(query.simplePage.start),#(query.simplePage.end)</if>");
+            bw.write("\t\t<if test=\"query.simplePage!=null\">limit #{query.simplePage.start},#{query.simplePage.pageSize}</if>");
             bw.newLine();
             bw.write("\t</select>");
             bw.newLine();
@@ -184,7 +191,7 @@ public class BuildMapperXml {
             bw.newLine();
             bw.write("\t<select id=\"selectCount\" resultType=\"java.lang.Integer\">");
             bw.newLine();
-            bw.write("\t\tSELECT count(1) FROM " + tableInfo.getTableName() +" <include refid=\"" +QUERY_CONDITION + "\"/>");
+            bw.write("\t\tSELECT count(1) FROM " + tableInfo.getTableName() + " t<include refid=\"" +QUERY_CONDITION + "\"/>");
             bw.newLine();
             bw.write("\t</select>");
             bw.newLine();
@@ -193,27 +200,9 @@ public class BuildMapperXml {
             bw.newLine();
             bw.write("\t<!--单条插入(匹配有值的字段)-->");
             bw.newLine();
-            bw.write("\t<insert id=\"insert\" parameterType=\"" + poClass + "\"" +
-                    " useGeneratedKeys=\"true\" keyProperty=\"bean.id\">");
+            bw.write("\t<insert id=\"insert\"" + generatedKeys + ">");
             bw.newLine();
-
-            FieldInfo autoIncrementField = null;
-            for(FieldInfo fieldInfo : tableInfo.getFieldList()) {
-                if( fieldInfo.isAutoIncrement()) {
-                    autoIncrementField = fieldInfo;
-                    break;
-                }
-            }
-            if(autoIncrementField != null) {
-                // bw.write("\t\t<selectKey keyProperty=\"bean." + autoIncrementField.getPropertyName() + "\" resultType=\""+autoIncrementField.getJavaType()+
-                //         "\" order=\"AFTER\" >");
-                bw.write("\t\tINSERT INTO "+ tableInfo.getTableName() +" ");
-                // bw.newLine();
-                // bw.write("\t\t\tSELECT LAST_INSERT_ID()");
-                // bw.newLine();
-                // bw.write("\t\t</selectKey>");
-                bw.newLine();
-            }
+            bw.write("\t\tINSERT INTO "+ tableInfo.getTableName() +" ");
             bw.newLine();
             bw.write("\t\t<trim prefix=\"(\" suffix=\")\" suffixOverrides=\",\">");
             bw.newLine();
@@ -246,8 +235,7 @@ public class BuildMapperXml {
             bw.newLine();
             bw.write("\t<!--插入或更新(匹配有值的字段)-->");
             bw.newLine();
-            bw.write("\t<insert id=\"insertOrUpdate\" parameterType=\"" + poClass + "\"" +
-                    " useGeneratedKeys=\"true\" keyProperty=\"bean.id\">");
+            bw.write("\t<insert id=\"insertOrUpdate\"" + generatedKeys + ">");
             bw.newLine();
             bw.write("\t\tINSERT INTO "+ tableInfo.getTableName() +" ");
             bw.newLine();
@@ -310,43 +298,47 @@ public class BuildMapperXml {
             bw.newLine();
             bw.write("\t<!--批量插入-->");
             bw.newLine();
-            bw.write("\t<insert id=\"insertBatch\" parameterType=\"" + "java.util.List" + "\"" +
-                    " useGeneratedKeys=\"true\" keyProperty=\".id\">");
-            bw.newLine();
-            StringBuffer insertFieldBuffer = new StringBuffer();
+            StringBuilder insertFieldBuffer = new StringBuilder();
+            StringBuilder insertPropertyBuffer = new StringBuilder();
             for(FieldInfo fieldInfo : tableInfo.getFieldList()) {
                 if(fieldInfo.isAutoIncrement()) {
                     continue;
                 }
-                insertFieldBuffer.append( fieldInfo.getFieldName()).append(",");
+                insertFieldBuffer.append(fieldInfo.getFieldName()).append(",");
+                insertPropertyBuffer.append("#{item.").append(fieldInfo.getPropertyName()).append("},");
             }
-            String insertFieldBufferStr = insertFieldBuffer.substring(0,insertFieldBuffer.lastIndexOf(","));
-            bw.write("\t\tINSERT INTO "+ tableInfo.getTableName() +"( " +insertFieldBufferStr+" )VALUES");
-            bw.newLine();
-            bw.write("\t\t<foreach collection=\"list\" item=\"item\" separator=\",\" >");
-            bw.newLine();
-
-            StringBuffer insertPropertyBuffer = new StringBuffer();
-            for(FieldInfo fieldInfo : tableInfo.getFieldList()) {
-                if(fieldInfo.isAutoIncrement()) {
-                    continue;
-                }
-                insertPropertyBuffer.append("#{item." + fieldInfo.getPropertyName() + "},");
+            if (insertFieldBuffer.length() == 0) {
+                logger.warn("表 {} 只有自增列，跳过批量插入语句生成", tableInfo.getTableName());
+                bw.write("\t<!--表 " + tableInfo.getTableName() + " 只有自增列，未生成批量插入语句-->");
+                bw.newLine();
+            } else {
+                String insertFieldBufferStr = insertFieldBuffer.substring(0, insertFieldBuffer.lastIndexOf(","));
+                String insertPropertyBufferStr = insertPropertyBuffer.substring(0, insertPropertyBuffer.lastIndexOf(","));
+                bw.write("\t<insert id=\"insertBatch\" parameterType=\"" + "java.util.List" + "\"" + batchGeneratedKeys + ">");
+                bw.newLine();
+                bw.write("\t\tINSERT INTO "+ tableInfo.getTableName() +"( " +insertFieldBufferStr+" )VALUES");
+                bw.newLine();
+                bw.write("\t\t<foreach collection=\"list\" item=\"item\" separator=\",\" >");
+                bw.newLine();
+                bw.write("\t\t\t("+insertPropertyBufferStr+")");
+                bw.newLine();
+                bw.write("\t\t</foreach>");
+                bw.newLine();
+                bw.write("\t</insert>");
+                bw.newLine();
             }
-            String insertPropertyBufferStr = insertPropertyBuffer.substring(0,insertPropertyBuffer.lastIndexOf(","));
-            bw.write("\t\t\t("+insertPropertyBufferStr+")");
-            bw.newLine();
-            bw.write("\t\t</foreach>");
-            bw.newLine();
-            bw.write("\t</insert>");
-            bw.newLine();
 
             //批量插入或更新
             bw.newLine();
             bw.write("\t<!--批量插入或更新-->");
             bw.newLine();
-            bw.write("\t<insert id=\"insertOrUpdateBatch\" parameterType=\"" + "java.util.List" + "\"" +
-                    " useGeneratedKeys=\"true\" keyProperty=\".id\">");
+            if (insertFieldBuffer.length() == 0) {
+                bw.write("\t<!--表 " + tableInfo.getTableName() + " 只有自增列，未生成批量插入或更新语句-->");
+                bw.newLine();
+            } else {
+            String insertFieldBufferStr = insertFieldBuffer.substring(0, insertFieldBuffer.lastIndexOf(","));
+            String insertPropertyBufferStr = insertPropertyBuffer.substring(0, insertPropertyBuffer.lastIndexOf(","));
+            bw.write("\t<insert id=\"insertOrUpdateBatch\" parameterType=\"" + "java.util.List" + "\"" + batchGeneratedKeys + ">");
             bw.newLine();
             bw.write("\t\tINSERT INTO "+ tableInfo.getTableName() +" ("+insertFieldBufferStr+") VALUES");
             bw.newLine();
@@ -370,6 +362,7 @@ public class BuildMapperXml {
             bw.newLine();
             bw.write("\t</insert>");
             bw.newLine();
+            }
 
             //根据主键更新
             bw.newLine();
@@ -382,10 +375,10 @@ public class BuildMapperXml {
                 for(FieldInfo fieldInfo : keyFieldInfoList) {
                     index++;
                     methodName.append(StringUtils.uperCaseFirstLetter(fieldInfo.getPropertyName()));
-                    paramNames.append(fieldInfo.getPropertyName()+"=#{"+fieldInfo.getPropertyName()+"}");
+                    paramNames.append(fieldInfo.getFieldName()+"=#{"+fieldInfo.getPropertyName()+"}");
                     if(index < keyFieldInfoList.size()) {
                         methodName.append("And");
-                        paramNames.append("And");
+                        paramNames.append(" and ");
                     }
                 }
                 //查询
@@ -401,7 +394,7 @@ public class BuildMapperXml {
                 //更新
                 bw.write("\t<!--根据"+methodName+"更新-->");
                 bw.newLine();
-                bw.write("\t<update id=\"updateBy" + methodName + "\" parameterType=\"" + poClass + "\">");
+                bw.write("\t<update id=\"updateBy" + methodName + "\">");
                 bw.newLine();
                 bw.write("\t\tUPDATE " + tableInfo.getTableName());
                 bw.newLine();
@@ -442,20 +435,20 @@ public class BuildMapperXml {
             bw.flush();
         } catch (Exception e) {
             logger.error("生成mapper.xml失败", e);
-        } finally {
-            try {
-                if (bw != null) {
-                    bw.close();
-                }
-                if (outw != null) {
-                    outw.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            throw new IllegalStateException("生成mapper.xml失败: " + className, e);
         }
+    }
+
+    private static String escapeXmlComment(String comment) {
+        if (comment == null) {
+            return "";
+        }
+        return comment.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("--", "- -")
+                .replace("\r", "")
+                .replace("\n", " ");
     }
 }

@@ -3,42 +3,71 @@ package com.easyjava.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class PropertiesUtils {
-    private static Properties props = new Properties();
-    private static Map<String, String> PROPER_MAP = new ConcurrentHashMap<>();
+public final class PropertiesUtils {
+
+    private static final String CONFIG_FILE = "application.properties";
+
+    /**
+     * 支持 ${ENV_NAME:defaultValue} 形式的环境变量占位符
+     */
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\$\\{([^}:]+)(?::([^}]*))?}");
+
+    private static final Map<String, String> PROPER_MAP = new ConcurrentHashMap<>();
 
     static {
-        InputStream is = null;
-        try {
-            is = PropertiesUtils.class.getClassLoader().getResourceAsStream("application.properties");
-            props.load(new InputStreamReader(is, "UTF-8"));
-            Iterator<Object> iterator = props.keySet().iterator();
-            while (iterator.hasNext()){
-                String key = (String) iterator.next();
-                PROPER_MAP.put(key,props.getProperty(key));
+        Properties props = new Properties();
+        try (InputStream is = PropertiesUtils.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {
+            if (is == null) {
+                throw new IllegalStateException("找不到配置文件: " + CONFIG_FILE);
             }
-        } catch (Exception e) {
-
-        } finally {
-            if(is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            props.load(new InputStreamReader(is, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new IllegalStateException("读取配置文件失败: " + CONFIG_FILE, e);
+        }
+        for (String name : props.stringPropertyNames()) {
+            PROPER_MAP.put(name, resolvePlaceholders(props.getProperty(name)));
         }
     }
-    public static String getString(String key){
-        return PROPER_MAP.get(key);
+
+    private PropertiesUtils() {
     }
-    public static void main(String[] args) {
-        System.out.println(getString("db.driver.name"));
+
+    public static String getString(String key) {
+        String value = PROPER_MAP.get(key);
+        if (value == null) {
+            throw new IllegalStateException("缺少配置项: " + key);
+        }
+        return value;
+    }
+
+    public static String getString(String key, String defaultValue) {
+        String value = PROPER_MAP.get(key);
+        return value == null ? defaultValue : value;
+    }
+
+    private static String resolvePlaceholders(String value) {
+        if (value == null || !value.contains("${")) {
+            return value;
+        }
+        Matcher matcher = PLACEHOLDER.matcher(value);
+        StringBuilder sb = new StringBuilder();
+        while (matcher.find()) {
+            String envName = matcher.group(1).trim();
+            String defaultValue = matcher.group(2);
+            String replacement = System.getenv(envName);
+            if (replacement == null) {
+                replacement = defaultValue == null ? "" : defaultValue;
+            }
+            matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
+        }
+        matcher.appendTail(sb);
+        return sb.toString();
     }
 }

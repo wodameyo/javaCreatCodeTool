@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 
 import com.easyjava.bean.FieldInfo;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BuildPo {
     private  static  final Logger logger = LoggerFactory.getLogger(BuildPo.class);
@@ -35,10 +37,8 @@ public class BuildPo {
 
 
             if(tableInfo.isHaveDate() || tableInfo.isHaveDateTime()) {
-                bw.write(Constans.BEAN_DATE_PARSE_CLASS);
-                bw.newLine();
-                bw.write(Constans.BEAN_DATE_FORMAT_CLASS);
-                bw.newLine();
+                writeImport(bw, Constans.BEAN_DATE_PARSE_CLASS);
+                writeImport(bw, Constans.BEAN_DATE_FORMAT_CLASS);
                 bw.write("import " + Constans.PACKAGE_ENUMS+ ".DateTimePatternEnum;");
                 bw.newLine();
                 bw.write("import "+ Constans.PACKAGE_UTILS + ".DateUtils;");
@@ -50,20 +50,26 @@ public class BuildPo {
             bw.newLine();
 
             //是忽略属性
-            Boolean haveIgnoreBean = false;
+            boolean haveIgnoreBean = false;
+            String[] ignoreFields = Constans.IGNORE_BEAN_TOJSON_FIELD.split(",");
             for(FieldInfo field : tableInfo.getFieldList()) {
-                if(ArrayUtils.contains(Constans.IGNORE_BEAN_TOJSON_FIELD.split(","), field.getPropertyName())){
+                if(ArrayUtils.contains(ignoreFields, field.getPropertyName())){
                     haveIgnoreBean = true;
                     break;
                 }
             }
             if (haveIgnoreBean){
-                bw.write(Constans.IGNORE_BEAN_TOJSON_CLASS+";");
-                bw.newLine();
+                writeImport(bw, Constans.IGNORE_BEAN_TOJSON_CLASS);
             }
 
             if(tableInfo.isHaveBigDecimal()) {
                 bw.write("import java.math.BigDecimal;");
+                bw.newLine();
+            }
+            boolean haveBigInteger = tableInfo.getFieldList().stream()
+                    .anyMatch(field -> "BigInteger".equals(field.getJavaType()));
+            if (haveBigInteger) {
+                bw.write("import java.math.BigInteger;");
                 bw.newLine();
             }
             bw.newLine();
@@ -120,7 +126,7 @@ public class BuildPo {
             }
 
             //重写toString方法
-            StringBuffer toString = new StringBuffer();
+            List<String> toStringParts = new ArrayList<>();
             for(FieldInfo field : tableInfo.getFieldList()) {
                 String properName = field.getPropertyName();
                 if(ArrayUtils.contains(Constans.SQL_DATE_TIME_TYPES, field.getSqlType())) {
@@ -128,22 +134,20 @@ public class BuildPo {
                 } else if(ArrayUtils.contains(Constans.SQL_DATE_TYPES, field.getSqlType())) {
                     properName = "DateUtils.format(" + properName + ", DateTimePatternEnum.YYYY_MM_DD.getPattern())";
                 }
-                toString.append("\"," + field.getComment() + ":\" + (" + field.getPropertyName() +
-                        " == null ? \"空\" : "+ properName +") + ");
-                if(field.getPropertyName().equals(tableInfo.getFieldList().get(0).getPropertyName())){
-                    toString.deleteCharAt(1);
-                }
-                if(field.getPropertyName().equals(tableInfo.getFieldList().get(tableInfo.getFieldList().size()-1).getPropertyName())){
-                    toString.deleteCharAt(toString.length()-1);
-                    toString.deleteCharAt(toString.length()-1);
-                }
+                String comment = field.getComment() == null ? "" : field.getComment();
+                toStringParts.add("(\"" + escapeJavaString(comment) + ":\" + (" + field.getPropertyName()
+                        + " == null ? \"空\" : " + properName + "))");
             }
+
+            String toStringExpression = toStringParts.isEmpty()
+                    ? "\"" + escapeJavaString(tableInfo.getBeanName()) + "\""
+                    : String.join(" + \", \" + ", toStringParts);
 
             bw.write("\t@Override");
             bw.newLine();
             bw.write("\tpublic String toString() {");
             bw.newLine();
-            bw.write("\t\treturn "+ toString +";");
+            bw.write("\t\treturn "+ toStringExpression +";");
             bw.newLine();
             bw.write("\t}");
             bw.newLine();
@@ -167,5 +171,28 @@ public class BuildPo {
                 e.printStackTrace();
             }
         }
+    }
+
+    private static void writeImport(BufferedWriter bw, String importLine) throws IOException {
+        if (importLine == null || importLine.isBlank()) {
+            return;
+        }
+        String line = importLine.trim();
+        while (line.endsWith(";")) {
+            line = line.substring(0, line.length() - 1).trim();
+        }
+        if (!line.startsWith("import ")) {
+            line = "import " + line;
+        }
+        bw.write(line + ";");
+        bw.newLine();
+    }
+
+    private static String escapeJavaString(String value) {
+        return value.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t");
     }
 }

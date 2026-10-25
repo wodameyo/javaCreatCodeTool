@@ -6,13 +6,13 @@ import com.easyjava.enums.DateTimePatternEnum;
 import com.easyjava.utils.DateUtils;
 import java.util.Date;
 import java.io.Serializable;
-import com.fasterxml.jackson.annotation.JsonIgnore;;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 /**
  * @Description:这是一个用户表
- * @Author:哈基米基哈
- * @Date:2025-04-15 12:09:10
+ * @Author:zcs
+ * @Date:2026-10-25 23:56:38
  */
 public class UserInfo implements Serializable {
     /**
@@ -127,6 +127,6 @@ public class UserInfo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "这是id:" + (id == null ? "空" : id) + ",用户昵称:" + (userName == null ? "空" : userName) + ",商品名称:" + (productName == null ? "空" : productName) + ",创建时间:" + (createTime == null ? "空" : DateUtils.format(createTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern())) + ",硬币数量:" + (taotle == null ? "空" : taotle) + ",身份状态:" + (status == null ? "空" : status) + ",创建日期:" + (createDate == null ? "空" : DateUtils.format(createDate, DateTimePatternEnum.YYYY_MM_DD.getPattern())) + ",用户是否存在，0：删除 1：正常:" + (isDel == null ? "空" : isDel) ;
+		return ("这是id:" + (id == null ? "空" : id)) + ", " + ("用户昵称:" + (userName == null ? "空" : userName)) + ", " + ("商品名称:" + (productName == null ? "空" : productName)) + ", " + ("创建时间:" + (createTime == null ? "空" : DateUtils.format(createTime, DateTimePatternEnum.YYYY_MM_DD_HH_MM_SS.getPattern()))) + ", " + ("硬币数量:" + (taotle == null ? "空" : taotle)) + ", " + ("身份状态:" + (status == null ? "空" : status)) + ", " + ("创建日期:" + (createDate == null ? "空" : DateUtils.format(createDate, DateTimePatternEnum.YYYY_MM_DD.getPattern()))) + ", " + ("用户是否存在，0：删除 1：正常:" + (isDel == null ? "空" : isDel));
 	}
 }

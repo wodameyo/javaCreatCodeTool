@@ -4,28 +4,28 @@
 	<!--实体映射-->
 	<resultMap id="base_result_map" type="com.easyjava.entity.po.UserInfo">
 		<!--这是id-->
-		<id column="id" property="id" javaType="Integer" />
+		<id column="id" property="id" />
 
 		<!--用户昵称-->
-		<result column="user_name" property="userName" javaType="String" />
+		<result column="user_name" property="userName" />
 
 		<!--商品名称-->
-		<result column="product_name" property="productName" javaType="String" />
+		<result column="product_name" property="productName" />
 
 		<!--创建时间-->
-		<result column="create_time" property="createTime" javaType="Date" />
+		<result column="create_time" property="createTime" />
 
 		<!--硬币数量-->
-		<result column="taotle" property="taotle" javaType="Integer" />
+		<result column="taotle" property="taotle" />
 
 		<!--身份状态-->
-		<result column="status" property="status" javaType="Integer" />
+		<result column="status" property="status" />
 
 		<!--创建日期-->
-		<result column="create_date" property="createDate" javaType="Date" />
+		<result column="create_date" property="createDate" />
 
 		<!--用户是否存在，0：删除 1：正常-->
-		<result column="is_del" property="isDel" javaType="Integer" />
+		<result column="is_del" property="isDel" />
 
 	</resultMap>
 
@@ -37,50 +37,50 @@
 	<!--基础查询条件-->
 	<sql id="Base_Query_Condition">
 		<if test="query.id != null">
-			and id = #{query.id}
+			and t.id = #{query.id}
 		</if>
 		<if test="query.userName != null and query.userName!=''">
-			and id = #{query.userName}
+			and t.user_name = #{query.userName}
 		</if>
 		<if test="query.productName != null and query.productName!=''">
-			and id = #{query.productName}
+			and t.product_name = #{query.productName}
 		</if>
 		<if test="query.createTime != null">
-			and id = #{query.createTime}
+			and t.create_time = #{query.createTime}
 		</if>
 		<if test="query.taotle != null">
-			and id = #{query.taotle}
+			and t.taotle = #{query.taotle}
 		</if>
 		<if test="query.status != null">
-			and id = #{query.status}
+			and t.status = #{query.status}
 		</if>
 		<if test="query.createDate != null">
-			and id = #{query.createDate}
+			and t.create_date = #{query.createDate}
 		</if>
 		<if test="query.isDel != null">
-			and id = #{query.isDel}
+			and t.is_del = #{query.isDel}
 		</if>
 	</sql>
 
 	<!--扩展的查询条件-->
 	<sql id="Base_Query_Condition_Extend">
 		<if test="query.userNameFuzzy != null and query.userNameFuzzy !=''">
-			 and user_name like concat('%', #{query.userNameFuzzy}, '%')
+			 and t.user_name like concat('%', #{query.userNameFuzzy}, '%')
 		</if>
 		<if test="query.productNameFuzzy != null and query.productNameFuzzy !=''">
-			 and product_name like concat('%', #{query.productNameFuzzy}, '%')
+			 and t.product_name like concat('%', #{query.productNameFuzzy}, '%')
 		</if>
 		<if test="query.createTimeStart != null and query.createTimeStart !=''">
-			and create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d')
+			and t.create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d')
 		</if>
 		<if test="query.createTimeEnd != null and query.createTimeEnd !=''">
-			and create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'),interval 1 day)
+			and t.create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'),interval 1 day)
 		</if>
 		<if test="query.createDateStart != null and query.createDateStart !=''">
-			and create_date >= str_to_date(#{query.createDateStart}, '%Y-%m-%d')
+			and t.create_date >= str_to_date(#{query.createDateStart}, '%Y-%m-%d')
 		</if>
 		<if test="query.createDateEnd != null and query.createDateEnd !=''">
-			and create_date &lt; date_sub(str_to_date(#{query.createDateEnd}, '%Y-%m-%d'),interval 1 day)
+			and t.create_date &lt; date_sub(str_to_date(#{query.createDateEnd}, '%Y-%m-%d'),interval 1 day)
 		</if>
 	</sql>
 
@@ -94,20 +94,19 @@
 
 	<!--查询列表-->
 	<select id="selectList" resultMap="base_result_map">
-		SELECT <include refid="Base_Column_List"/> FROM ts_user_info <include refid="Query_Condition"/>
-		<if test="query.orderBy!=null">order by $(query.orderBy)</if>
-		<if test="query.simplePage!=null">limit #(query.simplePage.start),#(query.simplePage.end)</if>
+		SELECT <include refid="Base_Column_List"/> FROM ts_user_info t<include refid="Query_Condition"/>
+		<if test="query.orderBy!=null and query.orderBy!=''">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.start},#{query.simplePage.pageSize}</if>
 	</select>
 
 	<!--查询数量-->
 	<select id="selectCount" resultType="java.lang.Integer">
-		SELECT count(1) FROM ts_user_info <include refid="Query_Condition"/>
+		SELECT count(1) FROM ts_user_info t<include refid="Query_Condition"/>
 	</select>
 
 	<!--单条插入(匹配有值的字段)-->
-	<insert id="insert" parameterType="com.easyjava.entity.po.UserInfo" useGeneratedKeys="true" keyProperty="bean.id">
+	<insert id="insert" useGeneratedKeys="true" keyProperty="bean.id">
 		INSERT INTO ts_user_info 
-
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
 				id,
@@ -163,7 +162,7 @@
 	</insert>
 
 	<!--插入或更新(匹配有值的字段)-->
-	<insert id="insertOrUpdate" parameterType="com.easyjava.entity.po.UserInfo" useGeneratedKeys="true" keyProperty="bean.id">
+	<insert id="insertOrUpdate" useGeneratedKeys="true" keyProperty="bean.id">
 		INSERT INTO ts_user_info 
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
@@ -242,7 +241,7 @@
 	</insert>
 
 	<!--批量插入-->
-	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty=".id">
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO ts_user_info( user_name,product_name,create_time,taotle,status,create_date,is_del )VALUES
 		<foreach collection="list" item="item" separator="," >
 			(#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel})
@@ -250,7 +249,7 @@
 	</insert>
 
 	<!--批量插入或更新-->
-	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty=".id">
+	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO ts_user_info (user_name,product_name,create_time,taotle,status,create_date,is_del) VALUES
 		<foreach collection="list" item="item" separator="," >
 			(#{item.userName},#{item.productName},#{item.createTime},#{item.taotle},#{item.status},#{item.createDate},#{item.isDel})
@@ -265,7 +264,7 @@
 	</select>
 
 	<!--根据Id更新-->
-	<update id="updateById" parameterType="com.easyjava.entity.po.UserInfo">
+	<update id="updateById">
 		UPDATE ts_user_info
 		<set>
 			<if test="bean.userName!= null">
@@ -300,11 +299,11 @@
 
 	<!--根据UserName查询-->
 	<select id="selectByUserName" resultMap="base_result_map">
-		SELECT <include refid="Base_Column_List"/> from ts_user_info where userName=#{userName}
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where user_name=#{userName}
 	</select>
 
 	<!--根据UserName更新-->
-	<update id="updateByUserName" parameterType="com.easyjava.entity.po.UserInfo">
+	<update id="updateByUserName">
 		UPDATE ts_user_info
 		<set>
 			<if test="bean.userName!= null">
@@ -329,12 +328,12 @@
 				is_del = #{bean.isDel},
 			</if>
 		</set>
-		where userName=#{userName}
+		where user_name=#{userName}
 	</update>
 
 	<!--根据UserName删除-->
 	<delete id="deleteByUserName">
-		DELETE FROM ts_user_info where userName=#{userName}
+		DELETE FROM ts_user_info where user_name=#{userName}
 	</delete>
 
 </mapper>

@@ -3,23 +3,25 @@ package com.easyjava.controller;
 import com.easyjava.exception.BusinessException;
 import com.easyjava.entity.vo.ResponseVO;
 import com.easyjava.enums.ResponseCodeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import javax.servlet.http.HttpServletRequest;
-import java.net.BindException;
-import java.util.logging.Logger;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
-public class AGlobalExceptionHandlerController extends ABaseController{
+public class AGlobalExceptionHandlerController extends ABaseController {
 
-    private static final Logger logger = Logger.getLogger(AGlobalExceptionHandlerController.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AGlobalExceptionHandlerController.class);
 
     @ExceptionHandler(Exception.class)
-    Object handleException(Exception e, HttpServletRequest request) {
-        logger.severe(String.format("请求错误，请求地址: %s, 错误信息: %s", request.getRequestURI(), e.getMessage()));
+    public ResponseVO handleException(Exception e, HttpServletRequest request) {
+        logger.error("请求错误，请求地址: {}, 错误信息: {}", request.getRequestURI(), e.getMessage(), e);
         ResponseVO ajaxResponse = new ResponseVO();
         //404
         if(e instanceof NoHandlerFoundException) {
@@ -32,7 +34,9 @@ public class AGlobalExceptionHandlerController extends ABaseController{
             ajaxResponse.setCode(biz.getCode());
             ajaxResponse.setInfo(biz.getMessage());
             ajaxResponse.setStatus(STATUS_ERROR);
-        } else if (e instanceof BindException) {
+        } else if (e instanceof BindException
+                || e instanceof MethodArgumentNotValidException
+                || e instanceof IllegalArgumentException) {
             //参数校验异常
             ajaxResponse.setCode(ResponseCodeEnum.CODE_600.getCode());
             ajaxResponse.setInfo(ResponseCodeEnum.CODE_600.getMsg());

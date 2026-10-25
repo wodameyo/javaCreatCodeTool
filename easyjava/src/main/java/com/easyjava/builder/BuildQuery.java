@@ -47,6 +47,12 @@ public class BuildQuery {
                 bw.write("import java.math.BigDecimal;");
                 bw.newLine();
             }
+            boolean haveBigInteger = tableInfo.getFieldList().stream()
+                    .anyMatch(field -> "BigInteger".equals(field.getJavaType()));
+            if (haveBigInteger) {
+                bw.write("import java.math.BigInteger;");
+                bw.newLine();
+            }
             bw.newLine();
             bw.newLine();
             //生成注释

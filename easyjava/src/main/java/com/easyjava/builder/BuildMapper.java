@@ -4,10 +4,13 @@ import com.easyjava.bean.Constans;
 import com.easyjava.bean.FieldInfo;
 import com.easyjava.bean.TableInfo;
 import com.easyjava.utils.StringUtils;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
@@ -17,63 +20,62 @@ public class BuildMapper {
 
     public static void execute(TableInfo tableInfo) {
         File folder = new File(Constans.PATH_MAPPERS);
-        if (!folder.exists()) {
-            folder.mkdirs();
+        if (!folder.exists() && !folder.mkdirs()) {
+            throw new IllegalStateException("无法创建目录: " + folder.getAbsolutePath());
         }
+
         String className = tableInfo.getBeanName() + Constans.SUFFIX_MAPPERS;
-        File poFile = new File(folder, className+ ".java");
+        File mapperFile = new File(folder, className + ".java");
+        String beanName = tableInfo.getBeanName();
+        String queryName = tableInfo.getBeanParamName();
 
-        OutputStream out = null;
-        OutputStreamWriter outw = null;
-        BufferedWriter bw = null;
-        try {
-            out = new FileOutputStream(poFile);
-            outw = new OutputStreamWriter(out, "utf8");
-            bw = new BufferedWriter(outw);
-
+        try (BufferedWriter bw = Files.newBufferedWriter(mapperFile.toPath(), StandardCharsets.UTF_8)) {
             bw.write("package " + Constans.PACKAGE_MAPPERS + ";");
             bw.newLine();
             bw.newLine();
 
+            bw.write("import " + Constans.PACKAGE_PO + "." + beanName + ";");
+            bw.newLine();
+            bw.write("import " + Constans.PACKAGE_QUERY + "." + queryName + ";");
+            bw.newLine();
             bw.write("import org.apache.ibatis.annotations.Param;");
             bw.newLine();
             bw.newLine();
 
-            //生成类注释
-            BuildComment.createClassComment(bw, tableInfo.getComment()+"Mapper");
-            bw.write("public interface " + className + "<T, P> extends BaseMapper {");
+            BuildComment.createClassComment(bw, tableInfo.getComment() + "Mapper");
+            bw.write("public interface " + className + " extends BaseMapper<" + beanName + ", " + queryName + "> {");
             bw.newLine();
 
-            Map<String, List<FieldInfo>>  keyIndexMap = tableInfo.getKeyIndexMap();
-
-
-            for(Map.Entry<String, List<FieldInfo>> entry : keyIndexMap.entrySet()) {
+            for (Map.Entry<String, List<FieldInfo>> entry : tableInfo.getKeyIndexMap().entrySet()) {
                 List<FieldInfo> keyFieldInfoList = entry.getValue();
 
                 int index = 0;
                 StringBuilder methodName = new StringBuilder();
-
                 StringBuilder methodParam = new StringBuilder();
-                for(FieldInfo fieldInfo : keyFieldInfoList) {
+                String paramNames = buildParamNames(keyFieldInfoList);
+
+                for (FieldInfo fieldInfo : keyFieldInfoList) {
                     index++;
                     methodName.append(StringUtils.uperCaseFirstLetter(fieldInfo.getPropertyName()));
-                    if(index < keyFieldInfoList.size()) {
+                    if (index < keyFieldInfoList.size()) {
                         methodName.append("And");
                     }
-
-                    methodParam.append("@Param(\""+fieldInfo.getPropertyName()+"\") "+fieldInfo.getJavaType()+" " + fieldInfo.getPropertyName());
+                    methodParam.append("@Param(\"").append(fieldInfo.getPropertyName()).append("\") ")
+                            .append(fieldInfo.getJavaType()).append(" ").append(fieldInfo.getPropertyName());
                     if (index < keyFieldInfoList.size()) {
                         methodParam.append(", ");
                     }
                 }
+
                 BuildComment.createFieldComment(bw, "根据" + methodName + "查询");
-                bw.write("\tT selectBy" + methodName + "(" + methodParam + ");");
+                bw.write("\t" + beanName + " selectBy" + methodName + "(" + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();
 
                 BuildComment.createFieldComment(bw, "根据" + methodName + "更新");
-                bw.write("\tInteger updateBy" + methodName + "(@Param(\"bean\") T t, " + methodParam + ");");
+                bw.write("\tInteger updateBy" + methodName + "(@Param(\"bean\") " + beanName + " bean, "
+                        + methodParam + ");");
                 bw.newLine();
                 bw.newLine();
                 bw.newLine();
@@ -88,21 +90,19 @@ public class BuildMapper {
             bw.write("}");
             bw.flush();
         } catch (Exception e) {
-            logger.error("生成MAPPERS失败", e);
-        } finally {
-            try {
-                if (bw != null) {
-                    bw.close();
-                }
-                if (outw != null) {
-                    outw.close();
-                }
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            logger.error("生成Mapper失败", e);
+            throw new IllegalStateException("生成Mapper失败: " + className, e);
         }
+    }
+
+    private static String buildParamNames(List<FieldInfo> keyFieldInfoList) {
+        StringBuilder paramNames = new StringBuilder();
+        for (int i = 0; i < keyFieldInfoList.size(); i++) {
+            if (i > 0) {
+                paramNames.append(",");
+            }
+            paramNames.append(keyFieldInfoList.get(i).getPropertyName());
+        }
+        return paramNames.toString();
     }
 }
