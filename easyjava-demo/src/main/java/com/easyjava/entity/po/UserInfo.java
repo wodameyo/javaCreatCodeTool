@@ -8,11 +8,10 @@ import java.util.Date;
 import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-
 /**
  * @Description:这是一个用户表
  * @Author:zcs
- * @Date:2026-10-25 23:56:38
+ * @Date:2026-10-26 23:51:44
  */
 public class UserInfo implements Serializable {
     /**

@@ -10,11 +10,11 @@ public class SimplePage {
     private Integer start;
     private Integer end;
 
-    public SimplePage(){
+    public SimplePage() {
     }
 
     public SimplePage(Integer pageNo, Integer countTotal, Integer pageSize) {
-        if(null == pageNo) {
+        if (pageNo == null) {
             pageNo = 0;
         }
         this.pageNo = pageNo;
@@ -29,20 +29,20 @@ public class SimplePage {
     }
 
     public void action() {
-        if(this.pageSize == null || this.pageSize <= 0) {
+        if (this.pageSize == null || this.pageSize <= 0) {
             this.pageSize = PageSize.SIZE20.getSize();
         }
-        if(this.countTotal != null && this.countTotal > 0) {
-            this.pageTotal = this.countTotal % this.pageSize == 0 ? this.countTotal / this.pageSize
+        if (this.countTotal != null && this.countTotal > 0) {
+            this.pageTotal = this.countTotal % this.pageSize == 0
+                    ? this.countTotal / this.pageSize
                     : this.countTotal / this.pageSize + 1;
         } else {
             this.pageTotal = 1;
         }
-
-        if(this.pageNo == null || this.pageNo <= 1) {
+        if (this.pageNo == null || this.pageNo <= 1) {
             this.pageNo = 1;
         }
-        if(this.pageNo > this.pageTotal) {
+        if (this.pageNo > this.pageTotal) {
             this.pageNo = this.pageTotal;
         }
         this.start = (this.pageNo - 1) * this.pageSize;

@@ -8,42 +8,51 @@ import java.util.Map;
 
 public class DateUtils {
 
-    private static final Object lockObj = new Object();
-    private static Map<String, ThreadLocal<SimpleDateFormat>> sdMap = new HashMap<String, ThreadLocal<SimpleDateFormat>>();
+    private static final Object LOCK_OBJ = new Object();
+
+    private static final Map<String, ThreadLocal<SimpleDateFormat>> SD_MAP = new HashMap<>();
+
+    private DateUtils() {
+    }
 
     private static SimpleDateFormat getSdf(final String pattern) {
-        ThreadLocal<SimpleDateFormat> tl = sdMap.get(pattern);
-        if(tl == null) {
-            synchronized (lockObj) {
-                tl = sdMap.get(pattern);
-                if( tl == null) {
-                    tl =new ThreadLocal<SimpleDateFormat>() {
+        ThreadLocal<SimpleDateFormat> tl = SD_MAP.get(pattern);
+        if (tl == null) {
+            synchronized (LOCK_OBJ) {
+                tl = SD_MAP.get(pattern);
+                if (tl == null) {
+                    tl = new ThreadLocal<SimpleDateFormat>() {
                         @Override
                         protected SimpleDateFormat initialValue() {
-                            return new SimpleDateFormat(pattern);
+                            SimpleDateFormat format = new SimpleDateFormat(pattern);
+                            format.setLenient(false);
+                            return format;
                         }
                     };
-                    sdMap.put(pattern, tl);
+                    SD_MAP.put(pattern, tl);
                 }
             }
-         }
-         return tl.get();
+        }
+        return tl.get();
     }
 
     public static String format(Date date, String pattern) {
-        //return getSdf(pattern).format(date);
+        if (date == null) {
+            return null;
+        }
         SimpleDateFormat sdf = getSdf(pattern);
-        sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT+8")); // 显式设置时区
+        sdf.setTimeZone(java.util.TimeZone.getTimeZone("GMT+8"));
         return sdf.format(date);
     }
 
     public static Date parse(String dateStr, String pattern) {
-        try{
+        if (dateStr == null || dateStr.isBlank()) {
+            return null;
+        }
+        try {
             return getSdf(pattern).parse(dateStr);
         } catch (ParseException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException("日期解析失败: " + dateStr, e);
         }
-        return null;
     }
-
 }

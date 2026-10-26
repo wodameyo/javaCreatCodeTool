@@ -23,6 +23,8 @@
         <spring-boot.version>3.2.12</spring-boot.version>
         <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
         <commons-lang3.version>3.14.0</commons-lang3.version>
+        <freemarker.version>2.3.33</freemarker.version>
+        <snakeyaml.version>2.2</snakeyaml.version>
         <junit.version>5.10.3</junit.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>

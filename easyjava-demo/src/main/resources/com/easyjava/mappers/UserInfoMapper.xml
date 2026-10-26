@@ -1,37 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.easyjava.mappers.UserInfoMapper">
+
 	<!--实体映射-->
 	<resultMap id="base_result_map" type="com.easyjava.entity.po.UserInfo">
-		<!--这是id-->
 		<id column="id" property="id" />
-
-		<!--用户昵称-->
 		<result column="user_name" property="userName" />
-
-		<!--商品名称-->
 		<result column="product_name" property="productName" />
-
-		<!--创建时间-->
 		<result column="create_time" property="createTime" />
-
-		<!--硬币数量-->
 		<result column="taotle" property="taotle" />
-
-		<!--身份状态-->
 		<result column="status" property="status" />
-
-		<!--创建日期-->
 		<result column="create_date" property="createDate" />
-
-		<!--用户是否存在，0：删除 1：正常-->
 		<result column="is_del" property="isDel" />
-
 	</resultMap>
 
 	<!--通用查询结果列-->
 	<sql id="Base_Column_List">
-	id,user_name,product_name,create_time,taotle,status,create_date,is_del
+		id,user_name,product_name,create_time,taotle,status,create_date,is_del
 	</sql>
 
 	<!--基础查询条件-->
@@ -39,10 +24,10 @@
 		<if test="query.id != null">
 			and t.id = #{query.id}
 		</if>
-		<if test="query.userName != null and query.userName!=''">
+		<if test="query.userName != null and query.userName != ''">
 			and t.user_name = #{query.userName}
 		</if>
-		<if test="query.productName != null and query.productName!=''">
+		<if test="query.productName != null and query.productName != ''">
 			and t.product_name = #{query.productName}
 		</if>
 		<if test="query.createTime != null">
@@ -62,29 +47,29 @@
 		</if>
 	</sql>
 
-	<!--扩展的查询条件-->
+	<!--扩展查询条件-->
 	<sql id="Base_Query_Condition_Extend">
-		<if test="query.userNameFuzzy != null and query.userNameFuzzy !=''">
-			 and t.user_name like concat('%', #{query.userNameFuzzy}, '%')
+		<if test="query.userNameFuzzy != null and query.userNameFuzzy != ''">
+			and t.user_name like concat('%', #{query.userNameFuzzy}, '%')
 		</if>
-		<if test="query.productNameFuzzy != null and query.productNameFuzzy !=''">
-			 and t.product_name like concat('%', #{query.productNameFuzzy}, '%')
+		<if test="query.productNameFuzzy != null and query.productNameFuzzy != ''">
+			and t.product_name like concat('%', #{query.productNameFuzzy}, '%')
 		</if>
-		<if test="query.createTimeStart != null and query.createTimeStart !=''">
+		<if test="query.createTimeStart != null and query.createTimeStart != ''">
 			and t.create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d')
 		</if>
-		<if test="query.createTimeEnd != null and query.createTimeEnd !=''">
-			and t.create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'),interval 1 day)
+		<if test="query.createTimeEnd != null and query.createTimeEnd != ''">
+			and t.create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval 1 day)
 		</if>
-		<if test="query.createDateStart != null and query.createDateStart !=''">
+		<if test="query.createDateStart != null and query.createDateStart != ''">
 			and t.create_date >= str_to_date(#{query.createDateStart}, '%Y-%m-%d')
 		</if>
-		<if test="query.createDateEnd != null and query.createDateEnd !=''">
-			and t.create_date &lt; date_sub(str_to_date(#{query.createDateEnd}, '%Y-%m-%d'),interval 1 day)
+		<if test="query.createDateEnd != null and query.createDateEnd != ''">
+			and t.create_date &lt; date_sub(str_to_date(#{query.createDateEnd}, '%Y-%m-%d'), interval 1 day)
 		</if>
 	</sql>
 
-	<!--扩展的查询结果列-->
+	<!--通用查询条件-->
 	<sql id="Query_Condition">
 		<where>
 			<include refid="Base_Query_Condition"/>
@@ -106,7 +91,7 @@
 
 	<!--单条插入(匹配有值的字段)-->
 	<insert id="insert" useGeneratedKeys="true" keyProperty="bean.id">
-		INSERT INTO ts_user_info 
+		INSERT INTO ts_user_info
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
 				id,
@@ -163,7 +148,7 @@
 
 	<!--插入或更新(匹配有值的字段)-->
 	<insert id="insertOrUpdate" useGeneratedKeys="true" keyProperty="bean.id">
-		INSERT INTO ts_user_info 
+		INSERT INTO ts_user_info
 		<trim prefix="(" suffix=")" suffixOverrides=",">
 			<if test="bean.id != null">
 				id,
@@ -267,25 +252,25 @@
 	<update id="updateById">
 		UPDATE ts_user_info
 		<set>
-			<if test="bean.userName!= null">
+			<if test="bean.userName != null">
 				user_name = #{bean.userName},
 			</if>
-			<if test="bean.productName!= null">
+			<if test="bean.productName != null">
 				product_name = #{bean.productName},
 			</if>
-			<if test="bean.createTime!= null">
+			<if test="bean.createTime != null">
 				create_time = #{bean.createTime},
 			</if>
-			<if test="bean.taotle!= null">
+			<if test="bean.taotle != null">
 				taotle = #{bean.taotle},
 			</if>
-			<if test="bean.status!= null">
+			<if test="bean.status != null">
 				status = #{bean.status},
 			</if>
-			<if test="bean.createDate!= null">
+			<if test="bean.createDate != null">
 				create_date = #{bean.createDate},
 			</if>
-			<if test="bean.isDel!= null">
+			<if test="bean.isDel != null">
 				is_del = #{bean.isDel},
 			</if>
 		</set>
@@ -306,25 +291,25 @@
 	<update id="updateByUserName">
 		UPDATE ts_user_info
 		<set>
-			<if test="bean.userName!= null">
+			<if test="bean.userName != null">
 				user_name = #{bean.userName},
 			</if>
-			<if test="bean.productName!= null">
+			<if test="bean.productName != null">
 				product_name = #{bean.productName},
 			</if>
-			<if test="bean.createTime!= null">
+			<if test="bean.createTime != null">
 				create_time = #{bean.createTime},
 			</if>
-			<if test="bean.taotle!= null">
+			<if test="bean.taotle != null">
 				taotle = #{bean.taotle},
 			</if>
-			<if test="bean.status!= null">
+			<if test="bean.status != null">
 				status = #{bean.status},
 			</if>
-			<if test="bean.createDate!= null">
+			<if test="bean.createDate != null">
 				create_date = #{bean.createDate},
 			</if>
-			<if test="bean.isDel!= null">
+			<if test="bean.isDel != null">
 				is_del = #{bean.isDel},
 			</if>
 		</set>

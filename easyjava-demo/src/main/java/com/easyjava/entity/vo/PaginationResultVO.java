@@ -18,7 +18,7 @@ public class PaginationResultVO<T> {
     }
 
     public PaginationResultVO(Integer totalCount, Integer pageSize, Integer pageNo, Integer pageTotal, List<T> list) {
-        if (pageNo == 0) {
+        if (pageNo != null && pageNo == 0) {
             pageNo = 1;
         }
         this.totalCount = totalCount;
@@ -32,8 +32,7 @@ public class PaginationResultVO<T> {
         this.list = list;
     }
 
-    public PaginationResultVO(){
-
+    public PaginationResultVO() {
     }
 
     public Integer getTotalCount() {

@@ -2,11 +2,10 @@ package com.easyjava.entity.query;
 
 import java.util.Date;
 
-
 /**
  * @Description:这是一个用户表查询对象
  * @Author:zcs
- * @Date:2026-10-25 23:56:38
+ * @Date:2026-10-26 23:51:44
  */
 public class UserInfoQuery extends BaseQuery {
     /**

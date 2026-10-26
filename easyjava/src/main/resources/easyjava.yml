@@ -1,0 +1,55 @@
+# ============================================================
+# easyjava 代码生成器配置
+# 相对路径以「运行命令时的工作目录」为基准解析
+# 敏感信息使用 ${ENV_NAME:默认值} 从环境变量读取
+# ============================================================
+
+datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai
+  username: root
+  password: ${DB_PASSWORD:}
+
+output:
+  # 目标项目 Java 源码根目录
+  backend-dir: easyjava-demo/src/main/java
+  # 目标项目资源根目录（Mapper XML 等）
+  resources-dir: easyjava-demo/src/main/resources
+  # 前端代码输出目录，Phase 3 使用
+  frontend-dir: easyjava-demo-ui
+  # 覆盖策略：OVERWRITE / SKIP / BACKUP
+  overwrite-policy: BACKUP
+
+generator:
+  author: zcs
+  package-base: com.easyjava
+  packages:
+    po: entity.po
+    query: entity.query
+    vo: entity.vo
+    utils: utils
+    enums: enums
+    exception: exception
+    mappers: mappers
+    service: service
+    service-impl: service.impl
+    controller: controller
+
+  table:
+    # 为空表示包含全部表；支持 * 与 ? 通配
+    include: []
+    exclude: []
+    # 生成 Bean 名称时忽略的表前缀，可配置多个
+    ignore-prefix: [ts_]
+
+  backend:
+    lombok: false
+    # LEGACY: java.util.Date；LOCAL: java.time
+    date-type: LEGACY
+    transaction: true
+    # 生成 PO 时添加 @JsonIgnore 的属性名
+    ignore-json-fields: [status, taotle]
+
+frontend:
+  # 前端代码生成将在 Phase 3 提供
+  enabled: false

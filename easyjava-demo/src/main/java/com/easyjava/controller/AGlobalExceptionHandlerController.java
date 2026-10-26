@@ -1,8 +1,9 @@
 package com.easyjava.controller;
 
+import com.easyjava.enums.ResponseCodeEnum;
 import com.easyjava.exception.BusinessException;
 import com.easyjava.entity.vo.ResponseVO;
-import com.easyjava.enums.ResponseCodeEnum;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -12,46 +13,34 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 @RestControllerAdvice
 public class AGlobalExceptionHandlerController extends ABaseController {
 
     private static final Logger logger = LoggerFactory.getLogger(AGlobalExceptionHandlerController.class);
 
     @ExceptionHandler(Exception.class)
-    public ResponseVO handleException(Exception e, HttpServletRequest request) {
+    public ResponseVO<?> handleException(Exception e, HttpServletRequest request) {
         logger.error("请求错误，请求地址: {}, 错误信息: {}", request.getRequestURI(), e.getMessage(), e);
-        ResponseVO ajaxResponse = new ResponseVO();
-        //404
-        if(e instanceof NoHandlerFoundException) {
-            ajaxResponse.setCode(ResponseCodeEnum.CODE_404.getCode());
-            ajaxResponse.setInfo(ResponseCodeEnum.CODE_404.getMsg());
-            ajaxResponse.setStatus(STATUS_ERROR);
-        } else if(e instanceof BusinessException) {
-            //业务异常
-            BusinessException biz = (BusinessException) e;
-            ajaxResponse.setCode(biz.getCode());
-            ajaxResponse.setInfo(biz.getMessage());
-            ajaxResponse.setStatus(STATUS_ERROR);
+        ResponseVO<Object> response = new ResponseVO<>();
+        response.setStatus(STATUS_ERROR);
+        if (e instanceof NoHandlerFoundException) {
+            response.setCode(ResponseCodeEnum.CODE_404.getCode());
+            response.setInfo(ResponseCodeEnum.CODE_404.getMsg());
+        } else if (e instanceof BusinessException biz) {
+            response.setCode(biz.getCode());
+            response.setInfo(biz.getMessage());
         } else if (e instanceof BindException
                 || e instanceof MethodArgumentNotValidException
                 || e instanceof IllegalArgumentException) {
-            //参数校验异常
-            ajaxResponse.setCode(ResponseCodeEnum.CODE_600.getCode());
-            ajaxResponse.setInfo(ResponseCodeEnum.CODE_600.getMsg());
-            ajaxResponse.setStatus(STATUS_ERROR);
+            response.setCode(ResponseCodeEnum.CODE_600.getCode());
+            response.setInfo(ResponseCodeEnum.CODE_600.getMsg());
         } else if (e instanceof DuplicateKeyException) {
-            //唯一键冲突
-            ajaxResponse.setCode(ResponseCodeEnum.CODE_601.getCode());
-            ajaxResponse.setInfo(ResponseCodeEnum.CODE_601.getMsg());
-            ajaxResponse.setStatus(STATUS_ERROR);
+            response.setCode(ResponseCodeEnum.CODE_601.getCode());
+            response.setInfo(ResponseCodeEnum.CODE_601.getMsg());
         } else {
-            //其他异常
-            ajaxResponse.setCode(ResponseCodeEnum.CODE_500.getCode());
-            ajaxResponse.setInfo(ResponseCodeEnum.CODE_500.getMsg());
-            ajaxResponse.setStatus(STATUS_ERROR);
+            response.setCode(ResponseCodeEnum.CODE_500.getCode());
+            response.setInfo(ResponseCodeEnum.CODE_500.getMsg());
         }
-        return ajaxResponse;
+        return response;
     }
 }

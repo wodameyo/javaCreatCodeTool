@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easyjava.mappers.UserInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyjava.entity.po.UserInfo">
+		<id column="id" property="id" />
+		<result column="user_name" property="userName" />
+		<result column="product_name" property="productName" />
+		<result column="create_time" property="createTime" />
+		<result column="create_date" property="createDate" />
+		<result column="status" property="status" />
+		<result column="taotle" property="taotle" />
+		<result column="is_del" property="isDel" />
+	</resultMap>
+
+	<!--通用查询结果列-->
+	<sql id="Base_Column_List">
+		id,user_name,product_name,create_time,create_date,status,taotle,is_del
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="Base_Query_Condition">
+		<if test="query.id != null">
+			and t.id = #{query.id}
+		</if>
+		<if test="query.userName != null and query.userName != ''">
+			and t.user_name = #{query.userName}
+		</if>
+		<if test="query.productName != null and query.productName != ''">
+			and t.product_name = #{query.productName}
+		</if>
+		<if test="query.createTime != null">
+			and t.create_time = #{query.createTime}
+		</if>
+		<if test="query.createDate != null">
+			and t.create_date = #{query.createDate}
+		</if>
+		<if test="query.status != null">
+			and t.status = #{query.status}
+		</if>
+		<if test="query.taotle != null">
+			and t.taotle = #{query.taotle}
+		</if>
+		<if test="query.isDel != null">
+			and t.is_del = #{query.isDel}
+		</if>
+	</sql>
+
+	<!--扩展查询条件-->
+	<sql id="Base_Query_Condition_Extend">
+		<if test="query.userNameFuzzy != null and query.userNameFuzzy != ''">
+			and t.user_name like concat('%', #{query.userNameFuzzy}, '%')
+		</if>
+		<if test="query.productNameFuzzy != null and query.productNameFuzzy != ''">
+			and t.product_name like concat('%', #{query.productNameFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != ''">
+			and t.create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d')
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != ''">
+			and t.create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval 1 day)
+		</if>
+		<if test="query.createDateStart != null and query.createDateStart != ''">
+			and t.create_date >= str_to_date(#{query.createDateStart}, '%Y-%m-%d')
+		</if>
+		<if test="query.createDateEnd != null and query.createDateEnd != ''">
+			and t.create_date &lt; date_sub(str_to_date(#{query.createDateEnd}, '%Y-%m-%d'), interval 1 day)
+		</if>
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="Query_Condition">
+		<where>
+			<include refid="Base_Query_Condition"/>
+			<include refid="Base_Query_Condition_Extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> FROM ts_user_info t<include refid="Query_Condition"/>
+		<if test="query.orderBy!=null and query.orderBy!=''">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.start},#{query.simplePage.pageSize}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT count(1) FROM ts_user_info t<include refid="Query_Condition"/>
+	</select>
+
+	<!--单条插入(匹配有值的字段)-->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_user_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.productName != null">
+				product_name,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createDate != null">
+				create_date,
+			</if>
+			<if test="bean.status != null">
+				status,
+			</if>
+			<if test="bean.taotle != null">
+				taotle,
+			</if>
+			<if test="bean.isDel != null">
+				is_del,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				#{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createDate != null">
+				#{bean.createDate},
+			</if>
+			<if test="bean.status != null">
+				#{bean.status},
+			</if>
+			<if test="bean.taotle != null">
+				#{bean.taotle},
+			</if>
+			<if test="bean.isDel != null">
+				#{bean.isDel},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或更新(匹配有值的字段)-->
+	<insert id="insertOrUpdate" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_user_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.userName != null">
+				user_name,
+			</if>
+			<if test="bean.productName != null">
+				product_name,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+			<if test="bean.createDate != null">
+				create_date,
+			</if>
+			<if test="bean.status != null">
+				status,
+			</if>
+			<if test="bean.taotle != null">
+				taotle,
+			</if>
+			<if test="bean.isDel != null">
+				is_del,
+			</if>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.userName != null">
+				#{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				#{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+			<if test="bean.createDate != null">
+				#{bean.createDate},
+			</if>
+			<if test="bean.status != null">
+				#{bean.status},
+			</if>
+			<if test="bean.taotle != null">
+				#{bean.taotle},
+			</if>
+			<if test="bean.isDel != null">
+				#{bean.isDel},
+			</if>
+		</trim>
+		ON DUPLICATE KEY UPDATE
+		<trim suffixOverrides=",">
+			<if test="bean.productName != null">
+				product_name = VALUES(product_name),
+			</if>
+			<if test="bean.createTime != null">
+				create_time = VALUES(create_time),
+			</if>
+			<if test="bean.createDate != null">
+				create_date = VALUES(create_date),
+			</if>
+			<if test="bean.taotle != null">
+				taotle = VALUES(taotle),
+			</if>
+			<if test="bean.isDel != null">
+				is_del = VALUES(is_del),
+			</if>
+		</trim>
+	</insert>
+
+	<!--批量插入-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ts_user_info( user_name,product_name,create_time,create_date,status,taotle,is_del )VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.userName},#{item.productName},#{item.createTime},#{item.createDate},#{item.status},#{item.taotle},#{item.isDel})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ts_user_info (user_name,product_name,create_time,create_date,status,taotle,is_del) VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.userName},#{item.productName},#{item.createTime},#{item.createDate},#{item.status},#{item.taotle},#{item.isDel})
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		user_name = VALUES(user_name),product_name = VALUES(product_name),create_time = VALUES(create_time),create_date = VALUES(create_date),status = VALUES(status),taotle = VALUES(taotle),is_del = VALUES(is_del)
+	</insert>
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById">
+		UPDATE ts_user_info
+		<set>
+			<if test="bean.userName != null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createDate != null">
+				create_date = #{bean.createDate},
+			</if>
+			<if test="bean.status != null">
+				status = #{bean.status},
+			</if>
+			<if test="bean.taotle != null">
+				taotle = #{bean.taotle},
+			</if>
+			<if test="bean.isDel != null">
+				is_del = #{bean.isDel},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		DELETE FROM ts_user_info where id=#{id}
+	</delete>
+
+	<!--根据UserName查询-->
+	<select id="selectByUserName" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where user_name=#{userName}
+	</select>
+
+	<!--根据UserName更新-->
+	<update id="updateByUserName">
+		UPDATE ts_user_info
+		<set>
+			<if test="bean.userName != null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createDate != null">
+				create_date = #{bean.createDate},
+			</if>
+			<if test="bean.status != null">
+				status = #{bean.status},
+			</if>
+			<if test="bean.taotle != null">
+				taotle = #{bean.taotle},
+			</if>
+			<if test="bean.isDel != null">
+				is_del = #{bean.isDel},
+			</if>
+		</set>
+		where user_name=#{userName}
+	</update>
+
+	<!--根据UserName删除-->
+	<delete id="deleteByUserName">
+		DELETE FROM ts_user_info where user_name=#{userName}
+	</delete>
+
+	<!--根据UserNameAndStatus查询-->
+	<select id="selectByUserNameAndStatus" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_user_info where user_name=#{userName} and status=#{status}
+	</select>
+
+	<!--根据UserNameAndStatus更新-->
+	<update id="updateByUserNameAndStatus">
+		UPDATE ts_user_info
+		<set>
+			<if test="bean.userName != null">
+				user_name = #{bean.userName},
+			</if>
+			<if test="bean.productName != null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+			<if test="bean.createDate != null">
+				create_date = #{bean.createDate},
+			</if>
+			<if test="bean.status != null">
+				status = #{bean.status},
+			</if>
+			<if test="bean.taotle != null">
+				taotle = #{bean.taotle},
+			</if>
+			<if test="bean.isDel != null">
+				is_del = #{bean.isDel},
+			</if>
+		</set>
+		where user_name=#{userName} and status=#{status}
+	</update>
+
+	<!--根据UserNameAndStatus删除-->
+	<delete id="deleteByUserNameAndStatus">
+		DELETE FROM ts_user_info where user_name=#{userName} and status=#{status}
+	</delete>
+
+</mapper>

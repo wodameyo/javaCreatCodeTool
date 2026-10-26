@@ -1,6 +1,7 @@
 package com.easyjava.exception;
 
 import com.easyjava.enums.ResponseCodeEnum;
+
 public class BusinessException extends RuntimeException {
 
     private ResponseCodeEnum codeEnum;
@@ -30,10 +31,10 @@ public class BusinessException extends RuntimeException {
         this.message = codeEnum.getMsg();
     }
 
-    public BusinessException(Integer code, String msessage) {
-        super(msessage);
+    public BusinessException(Integer code, String message) {
+        super(message);
         this.code = code;
-        this.message = msessage;
+        this.message = message;
     }
 
     public ResponseCodeEnum getCodeEnum() {
@@ -50,7 +51,7 @@ public class BusinessException extends RuntimeException {
     }
 
     /**
-     * 重写fillInStackTrace方法，防止堆栈信息过长
+     * 防止堆栈信息过长
      */
     @Override
     public Throwable fillInStackTrace() {

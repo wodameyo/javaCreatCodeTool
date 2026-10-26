@@ -1,14 +1,14 @@
 package com.easyjava.service;
 
-import com.easyjava.entity.vo.PaginationResultVO;
 import com.easyjava.entity.po.UserInfo;
 import com.easyjava.entity.query.UserInfoQuery;
+import com.easyjava.entity.vo.PaginationResultVO;
 import java.util.List;
 
 /**
  * @Description:这是一个用户表Service
  * @Author:zcs
- * @Date:2026-10-25 23:56:38
+ * @Date:2026-10-26 23:51:44
  */
 public interface UserInfoService {
 
@@ -71,5 +71,4 @@ public interface UserInfoService {
      * 根据UserName删除
      */
 	Integer deleteUserInfoByUserName(String userName);
-
 }

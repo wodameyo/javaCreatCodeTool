@@ -48,6 +48,4 @@ public class BaseQuery {
         }
         this.orderBy = normalized;
     }
-
-
 }
