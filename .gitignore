@@ -1,5 +1,10 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
+
+### easyjava UI ###
+node_modules/
+easyjava-server/src/main/resources/static/
+
 !**/src/main/**/target/
 !**/src/test/**/target/
 

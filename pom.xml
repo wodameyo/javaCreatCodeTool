@@ -11,6 +11,7 @@
 
     <modules>
         <module>easyjava</module>
+        <module>easyjava-server</module>
         <module>easyjava-demo</module>
     </modules>
 

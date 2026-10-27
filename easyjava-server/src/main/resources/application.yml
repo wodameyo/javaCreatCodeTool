@@ -1,0 +1,26 @@
+server:
+  address: 127.0.0.1
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: easyjava-server
+  jackson:
+    default-property-inclusion: non_null
+
+easyjava:
+  console:
+    # 允许写入/读取的根目录，相对路径基于启动时的工作目录
+    allowed-output-roots:
+      - .
+    # 数据源会话在内存中的闲置有效期（分钟）
+    session-ttl-minutes: 30
+    # ZIP 下载 token 的有效期（分钟），token 一次性使用
+    download-ttl-minutes: 5
+    version: 1.0-SNAPSHOT
+    phase: Phase 2
+
+logging:
+  level:
+    root: INFO
+    com.easyjava: INFO
