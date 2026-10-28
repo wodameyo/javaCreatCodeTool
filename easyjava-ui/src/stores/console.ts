@@ -50,6 +50,14 @@ function defaultConfig(): GeneratorConfigModel {
       include: [],
       exclude: [],
       ignorePrefix: ['ts_']
+    },
+    frontend: {
+      enabled: true,
+      typescript: true,
+      scaffoldOnly: false,
+      packageManager: 'npm',
+      apiBasePath: '/api',
+      overwritePolicy: 'BACKUP'
     }
   }
 }

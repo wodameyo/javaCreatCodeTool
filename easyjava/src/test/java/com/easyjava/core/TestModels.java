@@ -22,7 +22,8 @@ public final class TestModels {
         return new GeneratorConfig(
                 new GeneratorConfig.DataSource("com.mysql.cj.jdbc.Driver",
                         "jdbc:mysql://localhost:3306/test", "root", ""),
-                new GeneratorConfig.Output(backendDir, resourcesDir, null,
+                new GeneratorConfig.Output(backendDir, resourcesDir,
+                        backendDir.resolveSibling("frontend"),
                         GeneratorConfig.OverwritePolicy.BACKUP),
                 new GeneratorConfig.Table(List.of(), List.of(), List.of("ts_")),
                 new GeneratorConfig.Packages("com.easyjava",
@@ -30,7 +31,7 @@ public final class TestModels {
                         "exception", "mappers", "service", "service.impl", "controller"),
                 new GeneratorConfig.Backend(false, GeneratorConfig.DateType.LEGACY, true,
                         List.of("status", "taotle")),
-                new GeneratorConfig.Frontend(false),
+                new GeneratorConfig.Frontend(true, true, false, "npm", "/api", null),
                 "tester");
     }
 

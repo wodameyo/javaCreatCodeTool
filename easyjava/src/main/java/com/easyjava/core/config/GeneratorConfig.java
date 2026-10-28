@@ -216,13 +216,51 @@ public final class GeneratorConfig {
 
     public static final class Frontend {
         private final boolean enabled;
+        private final boolean typescript;
+        private final boolean scaffoldOnly;
+        private final String packageManager;
+        private final String apiBasePath;
+        private final OverwritePolicy overwritePolicy;
 
         public Frontend(boolean enabled) {
+            this(enabled, true, false, "npm", "/api", null);
+        }
+
+        public Frontend(boolean enabled, boolean typescript, boolean scaffoldOnly,
+                        String packageManager, String apiBasePath, OverwritePolicy overwritePolicy) {
             this.enabled = enabled;
+            this.typescript = typescript;
+            this.scaffoldOnly = scaffoldOnly;
+            this.packageManager = packageManager == null ? "npm" : packageManager;
+            this.apiBasePath = apiBasePath == null || apiBasePath.isBlank() ? "/api" : apiBasePath;
+            this.overwritePolicy = overwritePolicy;
         }
 
         public boolean isEnabled() {
             return enabled;
+        }
+
+        public boolean isTypescript() {
+            return typescript;
+        }
+
+        public boolean isScaffoldOnly() {
+            return scaffoldOnly;
+        }
+
+        public String getPackageManager() {
+            return packageManager;
+        }
+
+        public String getApiBasePath() {
+            return apiBasePath;
+        }
+
+        /**
+         * 前端业务文件的覆盖策略；为 null 时沿用 output.overwrite-policy。
+         */
+        public OverwritePolicy getOverwritePolicy() {
+            return overwritePolicy;
         }
     }
 

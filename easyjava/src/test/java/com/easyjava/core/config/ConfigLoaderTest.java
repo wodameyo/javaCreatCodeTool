@@ -63,7 +63,37 @@ class ConfigLoaderTest {
     }
 
     @Test
-    void rejectsEnabledFrontendUntilPhase3() throws IOException {
+    void loadsEnabledFrontendOptions() throws IOException {
+        Path config = writeConfig("""
+                datasource:
+                  url: jdbc:mysql://localhost:3306/test
+                  username: root
+                output:
+                  backend-dir: %s
+                  resources-dir: %s
+                  frontend-dir: %s
+                frontend:
+                  enabled: true
+                  typescript: true
+                  scaffold-only: true
+                  package-manager: pnpm
+                  api-base-path: /backend
+                  overwrite-policy: OVERWRITE
+                """.formatted(tempDir.resolve("java"), tempDir.resolve("resources"),
+                tempDir.resolve("frontend")));
+
+        GeneratorConfig.Frontend frontend = ConfigLoader.load(config).getFrontend();
+
+        assertTrue(frontend.isEnabled());
+        assertTrue(frontend.isTypescript());
+        assertTrue(frontend.isScaffoldOnly());
+        assertEquals("pnpm", frontend.getPackageManager());
+        assertEquals("/backend", frontend.getApiBasePath());
+        assertEquals(GeneratorConfig.OverwritePolicy.OVERWRITE, frontend.getOverwritePolicy());
+    }
+
+    @Test
+    void rejectsEnabledFrontendWithoutOutputDir() throws IOException {
         Path config = writeConfig("""
                 datasource:
                   url: jdbc:mysql://localhost:3306/test

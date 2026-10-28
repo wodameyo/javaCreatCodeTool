@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * @Description:这是一个用户表
  * @Author:zcs
- * @Date:2026-10-26 23:51:44
+ * @Date:2026-10-29 00:24:57
  */
 public class UserInfo implements Serializable {
     /**

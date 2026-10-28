@@ -140,14 +140,28 @@ public final class ConfigLoader {
 
         Map<String, Object> frontendNode = section(root, "frontend");
         boolean frontendEnabled = booleanValue(frontendNode, "enabled", false);
-        if (frontendEnabled) {
-            throw new IllegalArgumentException("frontend.enabled=true 将在 Phase 3 提供，请先设置为 false");
+        boolean frontendTypescript = booleanValue(frontendNode, "typescript", true);
+        if (!frontendTypescript) {
+            throw new IllegalArgumentException("frontend.typescript=false 暂未提供 JavaScript 模板");
         }
+        if (frontendEnabled && frontendDir == null) {
+            throw new IllegalArgumentException("frontend.enabled=true 时必须配置 output.frontend-dir");
+        }
+        String frontendPolicyValue = stringValue(frontendNode, "overwrite-policy", null);
+        GeneratorConfig.OverwritePolicy frontendPolicy = isBlank(frontendPolicyValue) ? null
+                : parseEnum(GeneratorConfig.OverwritePolicy.class, frontendPolicyValue,
+                        "frontend.overwrite-policy");
 
         return new GeneratorConfig(
                 new GeneratorConfig.DataSource(driver, url, username, password),
                 new GeneratorConfig.Output(backendDir, resourcesDir, frontendDir, policy),
-                table, packages, backend, new GeneratorConfig.Frontend(frontendEnabled), author);
+                table, packages, backend,
+                new GeneratorConfig.Frontend(frontendEnabled, frontendTypescript,
+                        booleanValue(frontendNode, "scaffold-only", false),
+                        stringValue(frontendNode, "package-manager", "npm"),
+                        stringValue(frontendNode, "api-base-path", "/api"),
+                        frontendPolicy),
+                author);
     }
 
     @SuppressWarnings("unchecked")

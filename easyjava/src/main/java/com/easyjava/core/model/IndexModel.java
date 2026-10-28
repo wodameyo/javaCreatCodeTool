@@ -63,6 +63,18 @@ public final class IndexModel {
     }
 
     /**
+     * Controller 方法声明，为每个参数补充 @RequestParam，避免依赖编译参数 -parameters。
+     */
+    public String getControllerParamDeclaration() {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (ColumnModel column : columns) {
+            joiner.add("@RequestParam(\"" + column.getPropertyName() + "\") "
+                    + column.getJavaType() + " " + column.getPropertyName());
+        }
+        return joiner.toString();
+    }
+
+    /**
      * Mapper 方法声明，为每个参数补充 @Param，保证 XML 中按名称取值。
      */
     public String getMapperParamDeclaration() {

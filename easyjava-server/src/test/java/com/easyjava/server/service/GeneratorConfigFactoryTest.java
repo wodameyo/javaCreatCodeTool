@@ -42,9 +42,11 @@ class GeneratorConfigFactoryTest {
                 defaults.packages(),
                 "tester",
                 new GeneratorConfigRequest.Output(tempDir.resolve("java").toString(),
-                        tempDir.resolve("resources").toString(), null, "SKIP"),
+                        tempDir.resolve("resources").toString(),
+                        tempDir.resolve("frontend").toString(), "SKIP"),
                 new GeneratorConfigRequest.Backend(true, "LOCAL", false, List.of("password")),
-                new GeneratorConfigRequest.Table(List.of(), List.of("sys_*"), List.of("t_", "tb_")));
+                new GeneratorConfigRequest.Table(List.of(), List.of("sys_*"), List.of("t_", "tb_")),
+                new GeneratorConfigRequest.Frontend(true, true, false, "pnpm", "/backend", "OVERWRITE"));
 
         GeneratorConfig config = factory.create(request, datasource, List.of("user_info", "order"));
 
@@ -57,6 +59,12 @@ class GeneratorConfigFactoryTest {
         assertEquals(List.of("user_info", "order"), config.getTable().getInclude());
         assertEquals(List.of("t_", "tb_"), config.getTable().getIgnorePrefix());
         assertEquals("tester", config.getAuthor());
+        assertTrue(config.getFrontend().isEnabled());
+        assertEquals(tempDir.resolve("frontend"), config.getOutput().getFrontendDir());
+        assertEquals("pnpm", config.getFrontend().getPackageManager());
+        assertEquals("/backend", config.getFrontend().getApiBasePath());
+        assertEquals(GeneratorConfig.OverwritePolicy.OVERWRITE,
+                config.getFrontend().getOverwritePolicy());
     }
 
     @Test
@@ -66,7 +74,8 @@ class GeneratorConfigFactoryTest {
                 defaults.packageBase(), defaults.packages(), defaults.author(),
                 new GeneratorConfigRequest.Output(tempDir.resolveSibling("outside").toString(),
                         tempDir.resolve("resources").toString(), null, "BACKUP"),
-                defaults.backend(), defaults.table());
+                defaults.backend(), defaults.table(),
+                new GeneratorConfigRequest.Frontend(false, true, false, "npm", "/api", null));
 
         assertThrows(ApiException.class,
                 () -> factory.create(request, datasource, List.of("user_info")));

@@ -7,6 +7,7 @@ import com.easyjava.mappers.UserInfoMapper;
 import com.easyjava.service.UserInfoService;
 import com.easyjava.entity.vo.PaginationResultVO;
 import com.easyjava.enums.PageSize;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

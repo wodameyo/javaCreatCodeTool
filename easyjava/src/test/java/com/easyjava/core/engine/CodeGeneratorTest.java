@@ -22,7 +22,7 @@ class CodeGeneratorTest {
         GeneratorConfig config = TestModels.config(tempDir.resolve("java"), tempDir.resolve("resources"));
         GenerationPlan plan = new CodeGenerator(config).generate(List.of(TestModels.userInfo()));
 
-        assertEquals(19, plan.getFileCount());
+        assertEquals(37, plan.getFileCount());
         assertTrue(content(plan, "java/com/easyjava/entity/po/UserInfo.java").contains("public class UserInfo"));
         assertTrue(content(plan, "java/com/easyjava/entity/query/BaseQuery.java")
                 .contains("public class BaseQuery"));
@@ -101,6 +101,52 @@ class CodeGeneratorTest {
 
         String baseQuery = content(plan, "java/com/easyjava/entity/query/BaseQuery.java");
         assertTrue(baseQuery.contains("非法的排序参数"));
+    }
+
+    @Test
+    void rendersFrontendTypesApiAndViews() {
+        GenerationPlan plan = plan();
+
+        String types = content(plan, "frontend/src/types/user-info.ts");
+        assertTrue(types.contains("export interface UserInfo {"));
+        assertTrue(types.contains("userNameFuzzy: string"));
+        assertTrue(types.contains("createTimeStart: string"));
+        assertTrue(types.contains("export type UserInfoPage = PaginationResultVO<UserInfo>"));
+
+        String api = content(plan, "frontend/src/api/user-info.ts");
+        assertTrue(api.contains("const BASE = '/userInfo'"));
+        assertTrue(api.contains("BASE + '/loadDataList'"));
+        assertTrue(api.contains("deleteUserInfoById"));
+
+        String list = content(plan, "frontend/src/views/user-info/index.vue");
+        assertTrue(list.contains("prop=\"userName\""));
+        assertTrue(list.contains("loadUserInfoList(listQuery)"));
+
+        String form = content(plan, "frontend/src/views/user-info/components/UserInfoForm.vue");
+        assertTrue(form.contains("{ max: 32"));
+        assertTrue(form.contains("value-format=\"YYYY-MM-DD HH:mm:ss\""));
+    }
+
+    @Test
+    void rendersFrontendRouterMarkerBlockAndScaffoldFlags() {
+        GenerationPlan plan = plan();
+
+        String tables = content(plan, "frontend/src/router/tables.ts");
+        assertTrue(tables.contains("// <easyjava:table name=\"ts_user_info\">"));
+        assertTrue(tables.contains("// </easyjava:table>"));
+
+        GeneratedFile router = find(plan, "frontend/src/router/tables.ts");
+        assertTrue(router.isMergeable());
+        assertFalse(router.isScaffold());
+        assertTrue(find(plan, "frontend/package.json").isScaffold());
+        assertTrue(content(plan, "frontend/src/router/index.ts").contains("tableRoutes"));
+    }
+
+    private static GeneratedFile find(GenerationPlan plan, String logicalPath) {
+        return plan.getFiles().stream()
+                .filter(file -> file.getLogicalPath().equals(logicalPath))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("未生成文件: " + logicalPath));
     }
 
     private GenerationPlan plan() {

@@ -2,12 +2,13 @@ package com.easyjava.mappers;
 
 import com.easyjava.entity.po.UserInfo;
 import com.easyjava.entity.query.UserInfoQuery;
+import java.util.Date;
 import org.apache.ibatis.annotations.Param;
 
 /**
  * @Description:这是一个用户表Mapper
  * @Author:zcs
- * @Date:2026-10-26 23:51:44
+ * @Date:2026-10-29 00:24:57
  */
 public interface UserInfoMapper extends BaseMapper<UserInfo, UserInfoQuery> {
 

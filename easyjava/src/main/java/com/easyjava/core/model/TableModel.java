@@ -5,6 +5,7 @@ import com.easyjava.core.naming.NamingStrategy;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringJoiner;
 
@@ -102,6 +103,66 @@ public final class TableModel {
             }
         }
         return null;
+    }
+
+    /**
+     * 主键索引的第一列；无主键时返回 null。
+     */
+    public ColumnModel getPrimaryColumn() {
+        IndexModel primary = getPrimaryIndex();
+        return primary == null ? null : primary.getFirstColumn();
+    }
+
+    /**
+     * 前端目录 / 路由使用的短横线模块名，如 user-info。
+     */
+    public String getModuleName() {
+        return beanName.replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase(Locale.ROOT);
+    }
+
+    public String getRoutePath() {
+        return "/" + getModuleName();
+    }
+
+    /**
+     * 菜单标题，优先使用表注释。
+     */
+    public String getMenuTitle() {
+        String title = comment.isBlank() ? getModuleName() : comment;
+        return title.replace("\r", " ").replace("\n", " ").trim();
+    }
+
+    /**
+     * 列表页展示字段：隐藏 @JsonIgnore 字段与二进制列。
+     */
+    public List<ColumnModel> getFrontendColumns() {
+        List<ColumnModel> result = new ArrayList<>();
+        for (ColumnModel column : columns) {
+            if (!column.isJsonIgnore() && !column.isBinaryType()) {
+                result.add(column);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 新增 / 编辑表单字段：隐藏自增主键、@JsonIgnore 与二进制列。
+     */
+    public List<ColumnModel> getFormColumns() {
+        List<ColumnModel> result = new ArrayList<>();
+        for (ColumnModel column : getFrontendColumns()) {
+            if (!column.isAutoIncrement()) {
+                result.add(column);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 搜索区字段：隐藏 @JsonIgnore 与二进制列。
+     */
+    public List<ColumnModel> getSearchColumns() {
+        return getFrontendColumns();
     }
 
     public List<ColumnModel> getInsertableColumns() {

@@ -3,10 +3,20 @@ package com.easyjava.core.model;
 import com.easyjava.core.naming.NamingStrategy;
 import com.easyjava.core.type.SqlTypeCategory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * 数据库列的不可变模型。
  */
 public final class ColumnModel {
+
+    private static final Pattern LENGTH_IN_TYPE = Pattern.compile("\\((\\d+)");
+
+    private static final Pattern QUOTED_VALUE = Pattern.compile("'([^']*)'");
 
     private final String columnName;
     private final String propertyName;
@@ -144,6 +154,100 @@ public final class ColumnModel {
 
     public String getTimeEndPropertyName() {
         return isTemporal() ? propertyName + NamingStrategy.TIME_END_SUFFIX : null;
+    }
+
+    public boolean isNumericType() {
+        return category == SqlTypeCategory.INTEGER || category == SqlTypeCategory.LONG
+                || category == SqlTypeCategory.BIG_INTEGER || category == SqlTypeCategory.DECIMAL;
+    }
+
+    /**
+     * text / longtext / json 等大文本列。
+     */
+    public boolean isTextType() {
+        String type = sqlType == null ? "" : sqlType.toLowerCase(Locale.ROOT);
+        return type.endsWith("text") || "json".equals(type);
+    }
+
+    /**
+     * MySQL 的 enum / set 列，取值从 COLUMN_TYPE 中解析。
+     */
+    public boolean isEnumType() {
+        String lower = rawSqlType == null ? "" : rawSqlType.toLowerCase(Locale.ROOT).trim();
+        return lower.startsWith("enum(") || lower.startsWith("set(");
+    }
+
+    public List<String> getEnumOptions() {
+        List<String> options = new ArrayList<>();
+        if (!isEnumType()) {
+            return options;
+        }
+        Matcher matcher = QUOTED_VALUE.matcher(rawSqlType);
+        while (matcher.find()) {
+            options.add(matcher.group(1));
+        }
+        return options;
+    }
+
+    /**
+     * 从 varchar(32) / decimal(10,2) 中解析长度或精度。
+     */
+    public Integer getLength() {
+        if (rawSqlType == null) {
+            return null;
+        }
+        Matcher matcher = LENGTH_IN_TYPE.matcher(rawSqlType);
+        return matcher.find() ? Integer.valueOf(matcher.group(1)) : null;
+    }
+
+    /**
+     * 非空且非自增列在表单中必填。
+     */
+    public boolean isRequired() {
+        return !nullable && !autoIncrement;
+    }
+
+    public String getDisplayName() {
+        return comment.isBlank() ? propertyName : comment.replace("\r", " ").replace("\n", " ");
+    }
+
+    /**
+     * 前端表单控件类型。
+     */
+    public String getFrontendControl() {
+        if (isBooleanType()) {
+            return "switch";
+        }
+        if (isEnumType()) {
+            return "select";
+        }
+        if (isNumericType()) {
+            return "number";
+        }
+        if (isTextType()) {
+            return "textarea";
+        }
+        if (isDateTimeType()) {
+            return "datetime";
+        }
+        if (isDateType()) {
+            return "date";
+        }
+        if (isTimeType()) {
+            return "time";
+        }
+        return "input";
+    }
+
+    /**
+     * 前端 TypeScript 类型。
+     */
+    public String getTsType() {
+        return switch (javaType) {
+            case "Integer", "Long", "BigDecimal", "BigInteger" -> "number";
+            case "Boolean" -> "boolean";
+            default -> "string";
+        };
     }
 
     /**

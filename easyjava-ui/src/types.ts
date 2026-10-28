@@ -61,6 +61,15 @@ export interface TableConfig {
   ignorePrefix: string[]
 }
 
+export interface FrontendConfig {
+  enabled: boolean
+  typescript: boolean
+  scaffoldOnly: boolean
+  packageManager: string
+  apiBasePath: string
+  overwritePolicy: string
+}
+
 export interface GeneratorConfigModel {
   packageBase: string
   packages: PackageConfig
@@ -68,6 +77,7 @@ export interface GeneratorConfigModel {
   output: OutputConfig
   backend: BackendConfig
   table: TableConfig
+  frontend: FrontendConfig
 }
 
 export interface FilePreview {

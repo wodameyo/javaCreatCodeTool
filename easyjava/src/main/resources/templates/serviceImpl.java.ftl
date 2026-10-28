@@ -8,6 +8,9 @@ import ${packages.mappers}.${table.mapperName};
 import ${packages.service}.${table.serviceName};
 import ${packages.vo}.PaginationResultVO;
 import ${packages.enums}.PageSize;
+<#list table.javaImports as importName>
+import ${importName};
+</#list>
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

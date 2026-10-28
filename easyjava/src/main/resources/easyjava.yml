@@ -51,5 +51,14 @@ generator:
     ignore-json-fields: [status, taotle]
 
 frontend:
-  # 前端代码生成将在 Phase 3 提供
-  enabled: false
+  enabled: true
+  # 当前仅提供 TypeScript 模板
+  typescript: true
+  # 只生成脚手架，不生成表页面与路由
+  scaffold-only: false
+  # npm / pnpm / yarn，仅作为生成工程的包管理器约定
+  package-manager: npm
+  # 前端请求前缀，Vite dev 代理会剥离该前缀
+  api-base-path: /api
+  # 前端业务文件覆盖策略，缺省沿用 output.overwrite-policy
+  overwrite-policy: BACKUP

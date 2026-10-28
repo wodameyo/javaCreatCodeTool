@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easyjava.mappers.OrderInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyjava.entity.po.OrderInfo">
+		<id column="id" property="id" />
+		<result column="order_no" property="orderNo" />
+		<result column="user_id" property="userId" />
+		<result column="product_id" property="productId" />
+		<result column="quantity" property="quantity" />
+		<result column="amount" property="amount" />
+		<result column="order_status" property="orderStatus" />
+		<result column="remark" property="remark" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+
+	<!--通用查询结果列-->
+	<sql id="Base_Column_List">
+		id,order_no,user_id,product_id,quantity,amount,order_status,remark,create_time
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="Base_Query_Condition">
+		<if test="query.id != null">
+			and t.id = #{query.id}
+		</if>
+		<if test="query.orderNo != null and query.orderNo != ''">
+			and t.order_no = #{query.orderNo}
+		</if>
+		<if test="query.userId != null">
+			and t.user_id = #{query.userId}
+		</if>
+		<if test="query.productId != null">
+			and t.product_id = #{query.productId}
+		</if>
+		<if test="query.quantity != null">
+			and t.quantity = #{query.quantity}
+		</if>
+		<if test="query.amount != null">
+			and t.amount = #{query.amount}
+		</if>
+		<if test="query.orderStatus != null">
+			and t.order_status = #{query.orderStatus}
+		</if>
+		<if test="query.remark != null and query.remark != ''">
+			and t.remark = #{query.remark}
+		</if>
+		<if test="query.createTime != null">
+			and t.create_time = #{query.createTime}
+		</if>
+	</sql>
+
+	<!--扩展查询条件-->
+	<sql id="Base_Query_Condition_Extend">
+		<if test="query.orderNoFuzzy != null and query.orderNoFuzzy != ''">
+			and t.order_no like concat('%', #{query.orderNoFuzzy}, '%')
+		</if>
+		<if test="query.remarkFuzzy != null and query.remarkFuzzy != ''">
+			and t.remark like concat('%', #{query.remarkFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != ''">
+			and t.create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d')
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != ''">
+			and t.create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval 1 day)
+		</if>
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="Query_Condition">
+		<where>
+			<include refid="Base_Query_Condition"/>
+			<include refid="Base_Query_Condition_Extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> FROM ts_order_info t<include refid="Query_Condition"/>
+		<if test="query.orderBy!=null and query.orderBy!=''">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.start},#{query.simplePage.pageSize}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT count(1) FROM ts_order_info t<include refid="Query_Condition"/>
+	</select>
+
+	<!--单条插入(匹配有值的字段)-->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_order_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.orderNo != null">
+				order_no,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.productId != null">
+				product_id,
+			</if>
+			<if test="bean.quantity != null">
+				quantity,
+			</if>
+			<if test="bean.amount != null">
+				amount,
+			</if>
+			<if test="bean.orderStatus != null">
+				order_status,
+			</if>
+			<if test="bean.remark != null">
+				remark,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.orderNo != null">
+				#{bean.orderNo},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.productId != null">
+				#{bean.productId},
+			</if>
+			<if test="bean.quantity != null">
+				#{bean.quantity},
+			</if>
+			<if test="bean.amount != null">
+				#{bean.amount},
+			</if>
+			<if test="bean.orderStatus != null">
+				#{bean.orderStatus},
+			</if>
+			<if test="bean.remark != null">
+				#{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或更新(匹配有值的字段)-->
+	<insert id="insertOrUpdate" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_order_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.orderNo != null">
+				order_no,
+			</if>
+			<if test="bean.userId != null">
+				user_id,
+			</if>
+			<if test="bean.productId != null">
+				product_id,
+			</if>
+			<if test="bean.quantity != null">
+				quantity,
+			</if>
+			<if test="bean.amount != null">
+				amount,
+			</if>
+			<if test="bean.orderStatus != null">
+				order_status,
+			</if>
+			<if test="bean.remark != null">
+				remark,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.orderNo != null">
+				#{bean.orderNo},
+			</if>
+			<if test="bean.userId != null">
+				#{bean.userId},
+			</if>
+			<if test="bean.productId != null">
+				#{bean.productId},
+			</if>
+			<if test="bean.quantity != null">
+				#{bean.quantity},
+			</if>
+			<if test="bean.amount != null">
+				#{bean.amount},
+			</if>
+			<if test="bean.orderStatus != null">
+				#{bean.orderStatus},
+			</if>
+			<if test="bean.remark != null">
+				#{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+		</trim>
+		ON DUPLICATE KEY UPDATE
+		<trim suffixOverrides=",">
+			<if test="bean.userId != null">
+				user_id = VALUES(user_id),
+			</if>
+			<if test="bean.productId != null">
+				product_id = VALUES(product_id),
+			</if>
+			<if test="bean.quantity != null">
+				quantity = VALUES(quantity),
+			</if>
+			<if test="bean.amount != null">
+				amount = VALUES(amount),
+			</if>
+			<if test="bean.orderStatus != null">
+				order_status = VALUES(order_status),
+			</if>
+			<if test="bean.remark != null">
+				remark = VALUES(remark),
+			</if>
+			<if test="bean.createTime != null">
+				create_time = VALUES(create_time),
+			</if>
+		</trim>
+	</insert>
+
+	<!--批量插入-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ts_order_info( order_no,user_id,product_id,quantity,amount,order_status,remark,create_time )VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.orderNo},#{item.userId},#{item.productId},#{item.quantity},#{item.amount},#{item.orderStatus},#{item.remark},#{item.createTime})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ts_order_info (order_no,user_id,product_id,quantity,amount,order_status,remark,create_time) VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.orderNo},#{item.userId},#{item.productId},#{item.quantity},#{item.amount},#{item.orderStatus},#{item.remark},#{item.createTime})
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		order_no = VALUES(order_no),user_id = VALUES(user_id),product_id = VALUES(product_id),quantity = VALUES(quantity),amount = VALUES(amount),order_status = VALUES(order_status),remark = VALUES(remark),create_time = VALUES(create_time)
+	</insert>
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_order_info where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById">
+		UPDATE ts_order_info
+		<set>
+			<if test="bean.orderNo != null">
+				order_no = #{bean.orderNo},
+			</if>
+			<if test="bean.userId != null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.productId != null">
+				product_id = #{bean.productId},
+			</if>
+			<if test="bean.quantity != null">
+				quantity = #{bean.quantity},
+			</if>
+			<if test="bean.amount != null">
+				amount = #{bean.amount},
+			</if>
+			<if test="bean.orderStatus != null">
+				order_status = #{bean.orderStatus},
+			</if>
+			<if test="bean.remark != null">
+				remark = #{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		DELETE FROM ts_order_info where id=#{id}
+	</delete>
+
+	<!--根据OrderNo查询-->
+	<select id="selectByOrderNo" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_order_info where order_no=#{orderNo}
+	</select>
+
+	<!--根据OrderNo更新-->
+	<update id="updateByOrderNo">
+		UPDATE ts_order_info
+		<set>
+			<if test="bean.orderNo != null">
+				order_no = #{bean.orderNo},
+			</if>
+			<if test="bean.userId != null">
+				user_id = #{bean.userId},
+			</if>
+			<if test="bean.productId != null">
+				product_id = #{bean.productId},
+			</if>
+			<if test="bean.quantity != null">
+				quantity = #{bean.quantity},
+			</if>
+			<if test="bean.amount != null">
+				amount = #{bean.amount},
+			</if>
+			<if test="bean.orderStatus != null">
+				order_status = #{bean.orderStatus},
+			</if>
+			<if test="bean.remark != null">
+				remark = #{bean.remark},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+		</set>
+		where order_no=#{orderNo}
+	</update>
+
+	<!--根据OrderNo删除-->
+	<delete id="deleteByOrderNo">
+		DELETE FROM ts_order_info where order_no=#{orderNo}
+	</delete>
+
+</mapper>

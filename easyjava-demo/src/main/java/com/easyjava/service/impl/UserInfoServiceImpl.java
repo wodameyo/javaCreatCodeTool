@@ -7,6 +7,7 @@ import com.easyjava.mappers.UserInfoMapper;
 import com.easyjava.service.UserInfoService;
 import com.easyjava.entity.vo.PaginationResultVO;
 import com.easyjava.enums.PageSize;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * @Description:这是一个用户表ServiceImpl
  * @Author:zcs
- * @Date:2026-10-26 23:51:44
+ * @Date:2026-10-29 00:24:57
  */
 @Service("userInfoService")
 @Transactional(rollbackFor = Exception.class)

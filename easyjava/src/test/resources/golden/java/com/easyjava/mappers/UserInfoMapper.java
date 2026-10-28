@@ -2,6 +2,7 @@ package com.easyjava.mappers;
 
 import com.easyjava.entity.po.UserInfo;
 import com.easyjava.entity.query.UserInfoQuery;
+import java.util.Date;
 import org.apache.ibatis.annotations.Param;
 
 /**

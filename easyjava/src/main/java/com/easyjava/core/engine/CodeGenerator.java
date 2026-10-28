@@ -20,6 +20,22 @@ public final class CodeGenerator {
 
     private static final DateTimeFormatter TIMESTAMP = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    private static final List<FrontendTemplate> FRONTEND_SCAFFOLD = List.of(
+            new FrontendTemplate("frontend/package.json.ftl", "package.json"),
+            new FrontendTemplate("frontend/vite.config.ts.ftl", "vite.config.ts"),
+            new FrontendTemplate("frontend/tsconfig.json.ftl", "tsconfig.json"),
+            new FrontendTemplate("frontend/tsconfig.node.json.ftl", "tsconfig.node.json"),
+            new FrontendTemplate("frontend/index.html.ftl", "index.html"),
+            new FrontendTemplate("frontend/env.development.ftl", ".env.development"),
+            new FrontendTemplate("frontend/env.d.ts.ftl", "src/env.d.ts"),
+            new FrontendTemplate("frontend/main.ts.ftl", "src/main.ts"),
+            new FrontendTemplate("frontend/App.vue.ftl", "src/App.vue"),
+            new FrontendTemplate("frontend/router-index.ts.ftl", "src/router/index.ts"),
+            new FrontendTemplate("frontend/request.ts.ftl", "src/utils/request.ts"),
+            new FrontendTemplate("frontend/common-types.ts.ftl", "src/types/common.ts"),
+            new FrontendTemplate("frontend/welcome.vue.ftl", "src/views/WelcomeView.vue")
+    );
+
     private static final List<BaseTemplate> BASE_TEMPLATES = List.of(
             new BaseTemplate("base/DateTimePatternEnum.java.ftl", BaseTemplate.Kind.ENUMS, "DateTimePatternEnum"),
             new BaseTemplate("base/DateUtils.java.ftl", BaseTemplate.Kind.UTILS, "DateUtils"),
@@ -82,7 +98,68 @@ public final class CodeGenerator {
             files.add(renderMapperXml(table, data));
         }
 
+        addFrontendFiles(files, tables, baseData);
+
         return new GenerationPlan(files, config);
+    }
+
+    private void addFrontendFiles(List<GeneratedFile> files, List<TableModel> tables,
+                                  Map<String, Object> baseData) {
+        GeneratorConfig.Frontend frontend = config.getFrontend();
+        if (frontend == null || !frontend.isEnabled()) {
+            return;
+        }
+        Path frontendDir = config.getOutput().getFrontendDir();
+        if (frontendDir == null) {
+            throw new IllegalStateException("frontend.enabled=true 时需要配置 output.frontend-dir");
+        }
+
+        Map<String, Object> data = new HashMap<>(baseData);
+        data.put("frontend", frontend);
+        data.put("tables", tables);
+        data.put("projectName", projectName(frontendDir));
+        data.put("business", !frontend.isScaffoldOnly());
+
+        for (FrontendTemplate template : FRONTEND_SCAFFOLD) {
+            files.add(renderFrontend(template.template(), template.path(), data, true, false));
+        }
+        files.add(renderFrontend("frontend/router-tables.ts.ftl", "src/router/tables.ts",
+                data, false, true));
+
+        if (frontend.isScaffoldOnly()) {
+            return;
+        }
+        for (TableModel table : tables) {
+            Map<String, Object> tableData = new HashMap<>(data);
+            tableData.put("table", table);
+            String module = table.getModuleName();
+            files.add(renderFrontend("frontend/entity-types.ts.ftl",
+                    "src/types/" + module + ".ts", tableData, false, false));
+            files.add(renderFrontend("frontend/api.ts.ftl",
+                    "src/api/" + module + ".ts", tableData, false, false));
+            files.add(renderFrontend("frontend/list.vue.ftl",
+                    "src/views/" + module + "/index.vue", tableData, false, false));
+            files.add(renderFrontend("frontend/form.vue.ftl",
+                    "src/views/" + module + "/components/" + table.getBeanName() + "Form.vue",
+                    tableData, false, false));
+        }
+    }
+
+    private GeneratedFile renderFrontend(String template, String relativePath,
+                                         Map<String, Object> data, boolean scaffold, boolean mergeable) {
+        String content = templateEngine.render(template, data);
+        Path target = config.getOutput().getFrontendDir().resolve(relativePath);
+        return new GeneratedFile("frontend/" + relativePath, target, content,
+                GeneratedFile.Kind.FRONTEND, scaffold, mergeable);
+    }
+
+    private static String projectName(Path frontendDir) {
+        Path fileName = frontendDir.getFileName();
+        String raw = fileName == null ? "easyjava-frontend" : fileName.toString();
+        String normalized = raw.toLowerCase()
+                .replaceAll("[^a-z0-9._-]", "-")
+                .replaceAll("^-+", "");
+        return normalized.isBlank() ? "easyjava-frontend" : normalized;
     }
 
     private GeneratedFile renderJava(String template, String packageName, String fileName,
@@ -134,5 +211,8 @@ public final class CodeGenerator {
         enum Kind {
             ENUMS, UTILS, QUERY, MAPPERS, VO, EXCEPTION, CONTROLLER
         }
+    }
+
+    private record FrontendTemplate(String template, String path) {
     }
 }

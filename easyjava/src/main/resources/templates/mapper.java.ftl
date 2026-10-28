@@ -3,6 +3,9 @@ package ${packages.mappers};
 
 import ${packages.po}.${table.beanName};
 import ${packages.query}.${table.queryName};
+<#list table.javaImports as importName>
+import ${importName};
+</#list>
 import org.apache.ibatis.annotations.Param;
 
 <@c.classComment description=table.docComment + "Mapper" author=author date=timestamp />

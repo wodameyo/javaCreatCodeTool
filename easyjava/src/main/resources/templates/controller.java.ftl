@@ -5,10 +5,14 @@ import ${packages.po}.${table.beanName};
 import ${packages.query}.${table.queryName};
 import ${packages.service}.${table.serviceName};
 import ${packages.vo}.ResponseVO;
+<#list table.javaImports as importName>
+import ${importName};
+</#list>
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 <@c.classComment description=table.docComment + "Controller" author=author date=timestamp />
@@ -59,7 +63,7 @@ public class ${table.controllerName} extends ABaseController {
      * 根据${idx.methodSuffix}查询
      */
 	@RequestMapping("/get${table.beanName}By${idx.methodSuffix}")
-	public ResponseVO<?> get${table.beanName}By${idx.methodSuffix}(${idx.paramDeclaration}) {
+	public ResponseVO<?> get${table.beanName}By${idx.methodSuffix}(${idx.controllerParamDeclaration}) {
 		return getSuccessResponseVO(this.${table.serviceBeanName}.get${table.beanName}By${idx.methodSuffix}(${idx.paramNames}));
 	}
 
@@ -67,7 +71,7 @@ public class ${table.controllerName} extends ABaseController {
      * 根据${idx.methodSuffix}更新
      */
 	@RequestMapping("/update${table.beanName}By${idx.methodSuffix}")
-	public ResponseVO<?> update${table.beanName}By${idx.methodSuffix}(@RequestBody ${table.beanName} bean, ${idx.paramDeclaration}) {
+	public ResponseVO<?> update${table.beanName}By${idx.methodSuffix}(@RequestBody ${table.beanName} bean, ${idx.controllerParamDeclaration}) {
 		this.${table.serviceBeanName}.update${table.beanName}By${idx.methodSuffix}(bean, ${idx.paramNames});
 		return getSuccessResponseVO(null);
 	}
@@ -76,7 +80,7 @@ public class ${table.controllerName} extends ABaseController {
      * 根据${idx.methodSuffix}删除
      */
 	@RequestMapping("/delete${table.beanName}By${idx.methodSuffix}")
-	public ResponseVO<?> delete${table.beanName}By${idx.methodSuffix}(${idx.paramDeclaration}) {
+	public ResponseVO<?> delete${table.beanName}By${idx.methodSuffix}(${idx.controllerParamDeclaration}) {
 		this.${table.serviceBeanName}.delete${table.beanName}By${idx.methodSuffix}(${idx.paramNames});
 		return getSuccessResponseVO(null);
 	}

@@ -4,6 +4,9 @@ package ${packages.service};
 import ${packages.po}.${table.beanName};
 import ${packages.query}.${table.queryName};
 import ${packages.vo}.PaginationResultVO;
+<#list table.javaImports as importName>
+import ${importName};
+</#list>
 import java.util.List;
 
 <@c.classComment description=table.docComment + "Service" author=author date=timestamp />

@@ -3,12 +3,13 @@ package com.easyjava.service;
 import com.easyjava.entity.po.UserInfo;
 import com.easyjava.entity.query.UserInfoQuery;
 import com.easyjava.entity.vo.PaginationResultVO;
+import java.util.Date;
 import java.util.List;
 
 /**
  * @Description:这是一个用户表Service
  * @Author:zcs
- * @Date:2026-10-26 23:51:44
+ * @Date:2026-10-29 00:24:57
  */
 public interface UserInfoService {
 

@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.easyjava.mappers.ProductInfoMapper">
+
+	<!--实体映射-->
+	<resultMap id="base_result_map" type="com.easyjava.entity.po.ProductInfo">
+		<id column="id" property="id" />
+		<result column="product_name" property="productName" />
+		<result column="product_code" property="productCode" />
+		<result column="category" property="category" />
+		<result column="price" property="price" />
+		<result column="stock" property="stock" />
+		<result column="on_sale" property="onSale" />
+		<result column="description" property="description" />
+		<result column="create_time" property="createTime" />
+	</resultMap>
+
+	<!--通用查询结果列-->
+	<sql id="Base_Column_List">
+		id,product_name,product_code,category,price,stock,on_sale,description,create_time
+	</sql>
+
+	<!--基础查询条件-->
+	<sql id="Base_Query_Condition">
+		<if test="query.id != null">
+			and t.id = #{query.id}
+		</if>
+		<if test="query.productName != null and query.productName != ''">
+			and t.product_name = #{query.productName}
+		</if>
+		<if test="query.productCode != null and query.productCode != ''">
+			and t.product_code = #{query.productCode}
+		</if>
+		<if test="query.category != null and query.category != ''">
+			and t.category = #{query.category}
+		</if>
+		<if test="query.price != null">
+			and t.price = #{query.price}
+		</if>
+		<if test="query.stock != null">
+			and t.stock = #{query.stock}
+		</if>
+		<if test="query.onSale != null">
+			and t.on_sale = #{query.onSale}
+		</if>
+		<if test="query.description != null and query.description != ''">
+			and t.description = #{query.description}
+		</if>
+		<if test="query.createTime != null">
+			and t.create_time = #{query.createTime}
+		</if>
+	</sql>
+
+	<!--扩展查询条件-->
+	<sql id="Base_Query_Condition_Extend">
+		<if test="query.productNameFuzzy != null and query.productNameFuzzy != ''">
+			and t.product_name like concat('%', #{query.productNameFuzzy}, '%')
+		</if>
+		<if test="query.productCodeFuzzy != null and query.productCodeFuzzy != ''">
+			and t.product_code like concat('%', #{query.productCodeFuzzy}, '%')
+		</if>
+		<if test="query.categoryFuzzy != null and query.categoryFuzzy != ''">
+			and t.category like concat('%', #{query.categoryFuzzy}, '%')
+		</if>
+		<if test="query.descriptionFuzzy != null and query.descriptionFuzzy != ''">
+			and t.description like concat('%', #{query.descriptionFuzzy}, '%')
+		</if>
+		<if test="query.createTimeStart != null and query.createTimeStart != ''">
+			and t.create_time >= str_to_date(#{query.createTimeStart}, '%Y-%m-%d')
+		</if>
+		<if test="query.createTimeEnd != null and query.createTimeEnd != ''">
+			and t.create_time &lt; date_sub(str_to_date(#{query.createTimeEnd}, '%Y-%m-%d'), interval 1 day)
+		</if>
+	</sql>
+
+	<!--通用查询条件-->
+	<sql id="Query_Condition">
+		<where>
+			<include refid="Base_Query_Condition"/>
+			<include refid="Base_Query_Condition_Extend"/>
+		</where>
+	</sql>
+
+	<!--查询列表-->
+	<select id="selectList" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> FROM ts_product_info t<include refid="Query_Condition"/>
+		<if test="query.orderBy!=null and query.orderBy!=''">order by ${query.orderBy}</if>
+		<if test="query.simplePage!=null">limit #{query.simplePage.start},#{query.simplePage.pageSize}</if>
+	</select>
+
+	<!--查询数量-->
+	<select id="selectCount" resultType="java.lang.Integer">
+		SELECT count(1) FROM ts_product_info t<include refid="Query_Condition"/>
+	</select>
+
+	<!--单条插入(匹配有值的字段)-->
+	<insert id="insert" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_product_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.productName != null">
+				product_name,
+			</if>
+			<if test="bean.productCode != null">
+				product_code,
+			</if>
+			<if test="bean.category != null">
+				category,
+			</if>
+			<if test="bean.price != null">
+				price,
+			</if>
+			<if test="bean.stock != null">
+				stock,
+			</if>
+			<if test="bean.onSale != null">
+				on_sale,
+			</if>
+			<if test="bean.description != null">
+				description,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.productName != null">
+				#{bean.productName},
+			</if>
+			<if test="bean.productCode != null">
+				#{bean.productCode},
+			</if>
+			<if test="bean.category != null">
+				#{bean.category},
+			</if>
+			<if test="bean.price != null">
+				#{bean.price},
+			</if>
+			<if test="bean.stock != null">
+				#{bean.stock},
+			</if>
+			<if test="bean.onSale != null">
+				#{bean.onSale},
+			</if>
+			<if test="bean.description != null">
+				#{bean.description},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+		</trim>
+	</insert>
+
+	<!--插入或更新(匹配有值的字段)-->
+	<insert id="insertOrUpdate" useGeneratedKeys="true" keyProperty="bean.id">
+		INSERT INTO ts_product_info
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				id,
+			</if>
+			<if test="bean.productName != null">
+				product_name,
+			</if>
+			<if test="bean.productCode != null">
+				product_code,
+			</if>
+			<if test="bean.category != null">
+				category,
+			</if>
+			<if test="bean.price != null">
+				price,
+			</if>
+			<if test="bean.stock != null">
+				stock,
+			</if>
+			<if test="bean.onSale != null">
+				on_sale,
+			</if>
+			<if test="bean.description != null">
+				description,
+			</if>
+			<if test="bean.createTime != null">
+				create_time,
+			</if>
+		</trim>
+		VALUES
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="bean.id != null">
+				#{bean.id},
+			</if>
+			<if test="bean.productName != null">
+				#{bean.productName},
+			</if>
+			<if test="bean.productCode != null">
+				#{bean.productCode},
+			</if>
+			<if test="bean.category != null">
+				#{bean.category},
+			</if>
+			<if test="bean.price != null">
+				#{bean.price},
+			</if>
+			<if test="bean.stock != null">
+				#{bean.stock},
+			</if>
+			<if test="bean.onSale != null">
+				#{bean.onSale},
+			</if>
+			<if test="bean.description != null">
+				#{bean.description},
+			</if>
+			<if test="bean.createTime != null">
+				#{bean.createTime},
+			</if>
+		</trim>
+		ON DUPLICATE KEY UPDATE
+		<trim suffixOverrides=",">
+			<if test="bean.productName != null">
+				product_name = VALUES(product_name),
+			</if>
+			<if test="bean.category != null">
+				category = VALUES(category),
+			</if>
+			<if test="bean.price != null">
+				price = VALUES(price),
+			</if>
+			<if test="bean.stock != null">
+				stock = VALUES(stock),
+			</if>
+			<if test="bean.onSale != null">
+				on_sale = VALUES(on_sale),
+			</if>
+			<if test="bean.description != null">
+				description = VALUES(description),
+			</if>
+			<if test="bean.createTime != null">
+				create_time = VALUES(create_time),
+			</if>
+		</trim>
+	</insert>
+
+	<!--批量插入-->
+	<insert id="insertBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ts_product_info( product_name,product_code,category,price,stock,on_sale,description,create_time )VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.productName},#{item.productCode},#{item.category},#{item.price},#{item.stock},#{item.onSale},#{item.description},#{item.createTime})
+		</foreach>
+	</insert>
+
+	<!--批量插入或更新-->
+	<insert id="insertOrUpdateBatch" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO ts_product_info (product_name,product_code,category,price,stock,on_sale,description,create_time) VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.productName},#{item.productCode},#{item.category},#{item.price},#{item.stock},#{item.onSale},#{item.description},#{item.createTime})
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+		product_name = VALUES(product_name),product_code = VALUES(product_code),category = VALUES(category),price = VALUES(price),stock = VALUES(stock),on_sale = VALUES(on_sale),description = VALUES(description),create_time = VALUES(create_time)
+	</insert>
+
+	<!--根据Id查询-->
+	<select id="selectById" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_product_info where id=#{id}
+	</select>
+
+	<!--根据Id更新-->
+	<update id="updateById">
+		UPDATE ts_product_info
+		<set>
+			<if test="bean.productName != null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.productCode != null">
+				product_code = #{bean.productCode},
+			</if>
+			<if test="bean.category != null">
+				category = #{bean.category},
+			</if>
+			<if test="bean.price != null">
+				price = #{bean.price},
+			</if>
+			<if test="bean.stock != null">
+				stock = #{bean.stock},
+			</if>
+			<if test="bean.onSale != null">
+				on_sale = #{bean.onSale},
+			</if>
+			<if test="bean.description != null">
+				description = #{bean.description},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<!--根据Id删除-->
+	<delete id="deleteById">
+		DELETE FROM ts_product_info where id=#{id}
+	</delete>
+
+	<!--根据ProductCode查询-->
+	<select id="selectByProductCode" resultMap="base_result_map">
+		SELECT <include refid="Base_Column_List"/> from ts_product_info where product_code=#{productCode}
+	</select>
+
+	<!--根据ProductCode更新-->
+	<update id="updateByProductCode">
+		UPDATE ts_product_info
+		<set>
+			<if test="bean.productName != null">
+				product_name = #{bean.productName},
+			</if>
+			<if test="bean.productCode != null">
+				product_code = #{bean.productCode},
+			</if>
+			<if test="bean.category != null">
+				category = #{bean.category},
+			</if>
+			<if test="bean.price != null">
+				price = #{bean.price},
+			</if>
+			<if test="bean.stock != null">
+				stock = #{bean.stock},
+			</if>
+			<if test="bean.onSale != null">
+				on_sale = #{bean.onSale},
+			</if>
+			<if test="bean.description != null">
+				description = #{bean.description},
+			</if>
+			<if test="bean.createTime != null">
+				create_time = #{bean.createTime},
+			</if>
+		</set>
+		where product_code=#{productCode}
+	</update>
+
+	<!--根据ProductCode删除-->
+	<delete id="deleteByProductCode">
+		DELETE FROM ts_product_info where product_code=#{productCode}
+	</delete>
+
+</mapper>

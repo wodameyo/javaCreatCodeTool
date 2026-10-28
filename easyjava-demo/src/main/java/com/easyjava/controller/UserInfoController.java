@@ -4,16 +4,18 @@ import com.easyjava.entity.po.UserInfo;
 import com.easyjava.entity.query.UserInfoQuery;
 import com.easyjava.service.UserInfoService;
 import com.easyjava.entity.vo.ResponseVO;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @Description:这是一个用户表Controller
  * @Author:zcs
- * @Date:2026-10-26 23:51:44
+ * @Date:2026-10-29 00:24:57
  */
 @RestController
 @RequestMapping("/userInfo")
@@ -61,7 +63,7 @@ public class UserInfoController extends ABaseController {
      * 根据Id查询
      */
 	@RequestMapping("/getUserInfoById")
-	public ResponseVO<?> getUserInfoById(Integer id) {
+	public ResponseVO<?> getUserInfoById(@RequestParam("id") Integer id) {
 		return getSuccessResponseVO(this.userInfoService.getUserInfoById(id));
 	}
 
@@ -69,7 +71,7 @@ public class UserInfoController extends ABaseController {
      * 根据Id更新
      */
 	@RequestMapping("/updateUserInfoById")
-	public ResponseVO<?> updateUserInfoById(@RequestBody UserInfo bean, Integer id) {
+	public ResponseVO<?> updateUserInfoById(@RequestBody UserInfo bean, @RequestParam("id") Integer id) {
 		this.userInfoService.updateUserInfoById(bean, id);
 		return getSuccessResponseVO(null);
 	}
@@ -78,7 +80,7 @@ public class UserInfoController extends ABaseController {
      * 根据Id删除
      */
 	@RequestMapping("/deleteUserInfoById")
-	public ResponseVO<?> deleteUserInfoById(Integer id) {
+	public ResponseVO<?> deleteUserInfoById(@RequestParam("id") Integer id) {
 		this.userInfoService.deleteUserInfoById(id);
 		return getSuccessResponseVO(null);
 	}
@@ -87,7 +89,7 @@ public class UserInfoController extends ABaseController {
      * 根据UserName查询
      */
 	@RequestMapping("/getUserInfoByUserName")
-	public ResponseVO<?> getUserInfoByUserName(String userName) {
+	public ResponseVO<?> getUserInfoByUserName(@RequestParam("userName") String userName) {
 		return getSuccessResponseVO(this.userInfoService.getUserInfoByUserName(userName));
 	}
 
@@ -95,7 +97,7 @@ public class UserInfoController extends ABaseController {
      * 根据UserName更新
      */
 	@RequestMapping("/updateUserInfoByUserName")
-	public ResponseVO<?> updateUserInfoByUserName(@RequestBody UserInfo bean, String userName) {
+	public ResponseVO<?> updateUserInfoByUserName(@RequestBody UserInfo bean, @RequestParam("userName") String userName) {
 		this.userInfoService.updateUserInfoByUserName(bean, userName);
 		return getSuccessResponseVO(null);
 	}
@@ -104,7 +106,7 @@ public class UserInfoController extends ABaseController {
      * 根据UserName删除
      */
 	@RequestMapping("/deleteUserInfoByUserName")
-	public ResponseVO<?> deleteUserInfoByUserName(String userName) {
+	public ResponseVO<?> deleteUserInfoByUserName(@RequestParam("userName") String userName) {
 		this.userInfoService.deleteUserInfoByUserName(userName);
 		return getSuccessResponseVO(null);
 	}

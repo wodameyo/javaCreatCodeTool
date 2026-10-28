@@ -5,7 +5,7 @@ import java.util.Date;
 /**
  * @Description:这是一个用户表查询对象
  * @Author:zcs
- * @Date:2026-10-26 23:51:44
+ * @Date:2026-10-29 00:24:57
  */
 public class UserInfoQuery extends BaseQuery {
     /**

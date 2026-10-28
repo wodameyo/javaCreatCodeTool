@@ -3,6 +3,7 @@ package com.easyjava.service;
 import com.easyjava.entity.po.UserInfo;
 import com.easyjava.entity.query.UserInfoQuery;
 import com.easyjava.entity.vo.PaginationResultVO;
+import java.util.Date;
 import java.util.List;
 
 /**

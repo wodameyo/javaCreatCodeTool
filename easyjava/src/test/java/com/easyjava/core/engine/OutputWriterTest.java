@@ -70,6 +70,45 @@ class OutputWriterTest {
     }
 
     @Test
+    void skipsExistingScaffoldFileEvenWhenPolicyIsOverwrite() throws IOException {
+        Path target = tempDir.resolve("frontend").resolve("package.json");
+        Files.createDirectories(target.getParent());
+        Files.writeString(target, "custom", StandardCharsets.UTF_8);
+        GeneratorConfig config = withPolicy(
+                TestModels.config(tempDir.resolve("java"), tempDir.resolve("resources")),
+                GeneratorConfig.OverwritePolicy.OVERWRITE);
+        GenerationPlan plan = new GenerationPlan(List.of(new GeneratedFile("frontend/package.json",
+                target, "generated", GeneratedFile.Kind.FRONTEND, true, false)), config);
+
+        GenerationSummary summary = new OutputWriter().write(plan, false);
+
+        assertEquals(1, summary.getSkipped().size());
+        assertEquals("custom", Files.readString(target));
+    }
+
+    @Test
+    void mergesMarkerBlocksEvenWithSkipPolicy() throws IOException {
+        Path target = tempDir.resolve("frontend").resolve("src").resolve("router").resolve("tables.ts");
+        Files.createDirectories(target.getParent());
+        Files.writeString(target, "const routes = [\n"
+                + "// <easyjava:table name=\"user_info\">\n  user\n// </easyjava:table>\n\n]\n",
+                StandardCharsets.UTF_8);
+        GeneratorConfig config = withPolicy(
+                TestModels.config(tempDir.resolve("java"), tempDir.resolve("resources")),
+                GeneratorConfig.OverwritePolicy.SKIP);
+        GenerationPlan plan = new GenerationPlan(List.of(new GeneratedFile("frontend/src/router/tables.ts",
+                target, "const routes = [\n"
+                + "// <easyjava:table name=\"order_info\">\n  order\n// </easyjava:table>\n\n]\n",
+                GeneratedFile.Kind.FRONTEND, false, true)), config);
+
+        new OutputWriter().write(plan, false);
+
+        String content = Files.readString(target);
+        assertTrue(content.contains("user"));
+        assertTrue(content.contains("order"));
+    }
+
+    @Test
     void exportsZipWithLogicalPaths() throws IOException {
         Path zipPath = tempDir.resolve("out.zip");
         GeneratorConfig config = TestModels.config(tempDir.resolve("java"), tempDir.resolve("resources"));

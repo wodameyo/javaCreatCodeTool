@@ -47,6 +47,14 @@ function next() {
     error.value = 'Java 输出目录与资源目录不能为空'
     return
   }
+  if (store.config.frontend.enabled && !store.config.output.frontendDir) {
+    error.value = '启用前端生成时，前端目录不能为空'
+    return
+  }
+  if (store.config.frontend.enabled && !store.config.frontend.typescript) {
+    error.value = '当前仅支持 TypeScript 前端模板'
+    return
+  }
   router.push('/preview')
 }
 </script>
@@ -92,7 +100,8 @@ function next() {
         <el-input v-model="store.config.output.resourcesDir" placeholder="easyjava-demo/src/main/resources" />
       </el-form-item>
       <el-form-item label="前端目录">
-        <el-input v-model="store.config.output.frontendDir" disabled placeholder="Phase 3 提供" />
+        <el-input v-model="store.config.output.frontendDir" :disabled="!store.config.frontend.enabled"
+          placeholder="easyjava-demo-ui" />
       </el-form-item>
       <el-form-item label="覆盖策略">
         <el-radio-group v-model="store.config.output.overwritePolicy">
@@ -140,6 +149,60 @@ function next() {
           </el-form-item>
         </el-col>
       </el-row>
+    </el-form>
+
+    <el-divider />
+
+    <div class="section-title">前端选项</div>
+    <el-form label-width="150px" label-position="left">
+      <el-row :gutter="16">
+        <el-col :md="8" :sm="24">
+          <el-form-item label="生成前端">
+            <el-switch v-model="store.config.frontend.enabled" />
+          </el-form-item>
+        </el-col>
+        <el-col :md="8" :sm="24">
+          <el-form-item label="仅生成脚手架">
+            <el-switch v-model="store.config.frontend.scaffoldOnly"
+              :disabled="!store.config.frontend.enabled" />
+          </el-form-item>
+        </el-col>
+        <el-col :md="8" :sm="24">
+          <el-form-item label="TypeScript">
+            <el-switch v-model="store.config.frontend.typescript"
+              :disabled="!store.config.frontend.enabled" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="16">
+        <el-col :md="8" :sm="24">
+          <el-form-item label="包管理器">
+            <el-select v-model="store.config.frontend.packageManager"
+              :disabled="!store.config.frontend.enabled" style="width: 100%">
+              <el-option label="npm" value="npm" />
+              <el-option label="pnpm" value="pnpm" />
+              <el-option label="yarn" value="yarn" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :md="8" :sm="24">
+          <el-form-item label="接口前缀">
+            <el-input v-model="store.config.frontend.apiBasePath"
+              :disabled="!store.config.frontend.enabled" placeholder="/api" />
+          </el-form-item>
+        </el-col>
+        <el-col :md="8" :sm="24">
+          <el-form-item label="前端覆盖策略">
+            <el-select v-model="store.config.frontend.overwritePolicy"
+              :disabled="!store.config.frontend.enabled" style="width: 100%">
+              <el-option label="BACKUP 备份后覆盖" value="BACKUP" />
+              <el-option label="OVERWRITE 直接覆盖" value="OVERWRITE" />
+              <el-option label="SKIP 跳过已存在" value="SKIP" />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <div class="hint">脚手架文件（package.json、vite.config.ts 等）首次生成后默认跳过；路由表按标记块增量合并。</div>
     </el-form>
 
     <el-collapse>

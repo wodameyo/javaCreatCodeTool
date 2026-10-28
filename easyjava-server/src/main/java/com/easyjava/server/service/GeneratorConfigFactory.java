@@ -37,7 +37,8 @@ public class GeneratorConfigFactory {
                 new GeneratorConfigRequest.Output("easyjava-demo/src/main/java",
                         "easyjava-demo/src/main/resources", "easyjava-demo-ui", "BACKUP"),
                 new GeneratorConfigRequest.Backend(false, "LEGACY", true, List.of("status", "taotle")),
-                new GeneratorConfigRequest.Table(List.of(), List.of(), List.of("ts_")));
+                new GeneratorConfigRequest.Table(List.of(), List.of(), List.of("ts_")),
+                new GeneratorConfigRequest.Frontend(true, true, false, "npm", "/api", "BACKUP"));
     }
 
     public GeneratorConfig create(GeneratorConfigRequest request, GeneratorConfig.DataSource datasource,
@@ -70,8 +71,26 @@ public class GeneratorConfigFactory {
                 fallback.output().resourcesDir()), "output.resourcesDir");
         GeneratorConfig.OverwritePolicy policy = parsePolicy(nonBlank(output.overwritePolicy(),
                 fallback.output().overwritePolicy()));
+
+        GeneratorConfigRequest.Frontend frontend = source.frontend() == null
+                ? fallback.frontend() : source.frontend();
+        boolean frontendEnabled = frontend.enabled() == null
+                ? Boolean.TRUE.equals(fallback.frontend().enabled()) : frontend.enabled();
+        Path frontendDir = frontendEnabled ? pathGuard.resolve(nonBlank(output.frontendDir(),
+                fallback.output().frontendDir()), "output.frontendDir") : null;
+        GeneratorConfig.OverwritePolicy frontendPolicy = frontend.overwritePolicy() == null
+                || frontend.overwritePolicy().isBlank() ? null
+                : parsePolicy(frontend.overwritePolicy());
+        GeneratorConfig.Frontend resolvedFrontend = new GeneratorConfig.Frontend(
+                frontendEnabled,
+                frontend.typescript() == null || frontend.typescript(),
+                Boolean.TRUE.equals(frontend.scaffoldOnly()),
+                nonBlank(frontend.packageManager(), "npm"),
+                nonBlank(frontend.apiBasePath(), "/api"),
+                frontendPolicy);
+
         GeneratorConfig.Output resolvedOutput = new GeneratorConfig.Output(
-                backendDir, resourcesDir, null, policy);
+                backendDir, resourcesDir, frontendDir, policy);
 
         GeneratorConfigRequest.Table table = source.table() == null ? fallback.table() : source.table();
         List<String> include = selectedTables != null && !selectedTables.isEmpty()
@@ -89,7 +108,7 @@ public class GeneratorConfigFactory {
 
         String author = nonBlank(source.author(), fallback.author());
         return new GeneratorConfig(datasource, resolvedOutput, resolvedTable, resolvedPackages,
-                resolvedBackend, new GeneratorConfig.Frontend(false), author);
+                resolvedBackend, resolvedFrontend, author);
     }
 
     private static String validatePackage(String value, String field) {
